@@ -19,6 +19,7 @@ Apify.main(async () => {
         type = 'cheerio',
         proxyConfiguration = { useApifyProxy: true },
         replicateStartUrls = 0,
+        retireInstanceAfterRequestCount = 10,
     } = input;
 
     const proxyUrl = proxyConfiguration.useApifyProxy
@@ -148,9 +149,11 @@ Apify.main(async () => {
         stealth: true,
     };
 
+    const puppeteerPoolOptions = { retireInstanceAfterRequestCount };
+
     const crawler = type === 'cheerio'
         ? new Apify.CheerioCrawler({ ...basicOptions, proxyUrls: proxyUrl ? [proxyUrl] : null })
-        : new Apify.PuppeteerCrawler({ ...basicOptions, launchPuppeteerOptions });
+        : new Apify.PuppeteerCrawler({ ...basicOptions, launchPuppeteerOptions, puppeteerPoolOptions });
 
     await crawler.run();
 

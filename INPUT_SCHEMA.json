@@ -67,6 +67,13 @@
             "minimum": 1,
             "default": 50
         },
+        "retireInstanceAfterRequestCount": {
+            "title": "Retire Instance After Request Count",
+            "type": "integer",
+            "description": "How often will the browser itself rotate. Pick higher for smaller consumption, pick less to rotate (test) more proxies",
+            "minimum": 1,
+            "default": 10
+        },
         "saveSnapshots": {
             "title": "Save Snapshots",
             "type": "boolean",
