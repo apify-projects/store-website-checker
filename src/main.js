@@ -26,10 +26,11 @@ Apify.main(async () => {
 
     const defaultState = {
         total: 0,
-        failedToLoad: 0,
+        timeouted: 0,
+        failedToLoadOther: 0,
         accessDenied: 0,
         recaptcha: 0,
-        distil: 0,
+        distilCaptcha: 0,
         statusCodes: {},
     };
 
@@ -51,7 +52,9 @@ Apify.main(async () => {
         }
     }
 
-    const handlePageFunction = async ({ request, $, page, response }) => {
+    const handlePageFunction = async ({ request, $, html, page, response }) => {
+        state.total++;
+
         let statusCode;
         // means Cheerio
         if ($) {
@@ -66,7 +69,7 @@ Apify.main(async () => {
         state.statusCodes[statusCode]++;
 
         if (!$) {
-            const html = await page.content();
+            html = await page.content();
             $ = cheerio.load(html);
         }
         const testResult = testHtml($);
@@ -89,13 +92,36 @@ Apify.main(async () => {
                 }
             });
         }
-        state.total++;
+
+
+        if (saveSnapshots) {
+            const key = `SNAPSHOT-${Math.random().toString()}`;
+            if (page) {
+                await Apify.utils.puppeteer.saveSnapshot(page, { key });
+            } else {
+                await Apify.setValue(key, html, { contentType: 'text/html' });
+            }
+        }
     }
 
     const handleFailedRequestFunction = ({ request }) => {
-        console.log(`Request failed --- ${request.url} --- ${request.errorMessages[0]} `)
         state.total++;
-        state.failedToLoad++;
+        const error = request.errorMessages[0]
+        console.log(`Request failed --- ${request.url}\n${error}`)
+        if (error.includes('request timed out')) {
+            state.timeouted++;
+        } else {
+            state.failedToLoadOther++;
+        }
+        // CheerioCrawler obscures status code >=500 to a tring message so we have to parse it
+        const maybeStatusCheerio = error.match(/CheerioCrawler: (\d\d\d) - Internal Server Error/);
+        if (maybeStatusCheerio) {
+            const statusCode = Number(maybeStatusCheerio[1]);
+            if (!state.statusCodes[statusCode]) {
+                state.statusCodes[statusCode] = 0;
+            }
+            state.statusCodes[statusCode]++;
+        }
     }
 
     const basicOptions = {

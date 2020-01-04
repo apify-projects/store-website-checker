@@ -1,4 +1,4 @@
-const distil = ($) => {
+const distilCaptcha = ($) => {
     return $('#distilCaptchaForm').length > 0
         || $('[action*="distil_r_captcha.html"]').length > 0;
 };
@@ -9,7 +9,7 @@ const accessDenied = ($) => {
 
 module.exports.testHtml = ($) => {
     return {
-        distil: distil($),
+        distilCaptcha: distilCaptcha($),
         accessDenied: accessDenied($),
     };
 }
