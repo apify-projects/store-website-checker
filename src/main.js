@@ -67,7 +67,7 @@ Apify.main(async () => {
                 screenshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`
                 htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             } else {
-                await Apify.setValue(key, html, { contentType: 'text/html' });
+                await Apify.setValue(`${key}.html`, html, { contentType: 'text/html' });
                 htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             }
 
