@@ -1,9 +1,24 @@
-# My beautiful actor
+## Website Checker
 
-The `README.md` file contains a documentation what your actor does and how to use it,
-which is then displayed in the app or Apify Store. It's always a good
-idea to write a good `README.md`, in a few months not even you
-will remember all the details about the actor.
+### Example output
 
-You can use [Markdown](https://www.markdownguide.org/cheat-sheet)
-language for rich formatting.
+#### Simple output
+```
+{
+    "timeouted": 0,
+    "failedToLoadOther": 9,
+    "accessDenied": 0,
+    "recaptcha": 0,
+    "distilCaptcha": 24,
+    "statusCodes": {
+        "200": 3,
+        "401": 2,
+        "403": 5,
+        "405": 24
+    },
+    "total": 43
+}
+```
+
+#### Detailed output with URLs, screenshots and HTML links
+https://api.apify.com/v2/key-value-stores/zT3zxpd53Wv9m9ukQ/records/DETAILED-OUTPUT?disableRedirect=true
