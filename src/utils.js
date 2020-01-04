@@ -6,7 +6,7 @@ module.exports.toSimpleState = (state) => {
             newValue = value.length;
         } else {
             newValue = {};
-            for (const [statusKey, statusValue] of Object.entries(state)) {
+            for (const [statusKey, statusValue] of Object.entries(value)) {
                 newValue[statusKey] = statusValue.length
             }
         }

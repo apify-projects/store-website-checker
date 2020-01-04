@@ -2,6 +2,7 @@ const Apify = require('apify');
 const cheerio = require('cheerio');
 
 const { testHtml } = require('./checkers.js');
+const { toSimpleState } = require('./utils.js');
 
 Apify.main(async () => {
     const input = await Apify.getInput();
@@ -17,7 +18,7 @@ Apify.main(async () => {
         saveSnapshots = false,
         type = 'cheerio',
         proxyConfiguration = { useApifyProxy: true },
-        replicateUrls = 0,
+        replicateStartUrls = 0,
     } = input;
 
     const proxyUrl = proxyConfiguration.useApifyProxy
@@ -39,15 +40,19 @@ Apify.main(async () => {
         await Apify.setValue('STATE', state);
     });
 
+    setInterval(async () => {
+        await Apify.setValue('STATE', state);
+    }, 10000);
+
     setInterval(() => {
-        console.dir(state)
+        console.dir(toSimpleState(state))
     }, 10000);
 
     const requestQueue = await Apify.openRequestQueue();
 
     for (const req of startUrls) {
         await requestQueue.addRequest({ ...req, headers: {'User-Agent': Apify.utils.getRandomUserAgent() } });
-        for (let i = 0; i < replicateUrls; i++) {
+        for (let i = 0; i < replicateStartUrls; i++) {
             await requestQueue.addRequest({ ...req, uniqueKey: Math.random().toString(), headers: {'User-Agent': Apify.utils.getRandomUserAgent() } });
         }
     }
@@ -145,5 +150,6 @@ Apify.main(async () => {
 
     await crawler.run();
 
-    await Apify.setValue('OUTPUT', state);
+    await Apify.setValue('OUTPUT', toSimpleState(state));
+    await Apify.setValue('DETAILED-OUTPUT', state);
 });

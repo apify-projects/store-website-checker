@@ -66,6 +66,12 @@
             "description": "Specified the maximum number of pages that can be processed by the scraper in parallel. The scraper automatically increases and decreases concurrency based on available system resources. This option enables you to set an upper limit, for example to reduce the load on a target website.",
             "minimum": 1,
             "default": 50
+        },
+        "saveSnapshots": {
+            "title": "Save Snapshots",
+            "type": "boolean",
+            "description": "Will save HTML for Cheerio and HTML + screenshot for Puppeteer",
+            "default": false
         }
     },
     "required": ["startUrls"]
