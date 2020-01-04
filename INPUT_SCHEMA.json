@@ -1,0 +1,72 @@
+{
+    "title": "Web Scraper Input",
+    "type": "object",
+    "description": "Web Scraper loads <b>Start URLs</b> in the Chrome browser and executes <b>Page function</b> on each page to extract data from it. To follow links and scrape additional pages, check <b>Use request queue</b> and set <b>Link selector</b> with <b>Pseudo-URLs</b> to specify which links to follow, or manually enqueue new links in <b>Page function</b>. For details, see actor's <a href='https://apify.com/apify/web-scraper' target='_blank' rel='noopener'>README</a> or <a href='https://apify.com/docs/scraping/tutorial/introduction' target='_blank' rel='noopener'>Web scraping tutorial</a> in documentation.",
+    "schemaVersion": 1,
+    "properties": {
+        "startUrls": {
+            "title": "Start URLs",
+            "type": "array",
+            "description": "A static list of URLs to scrape. To be able to add new URLs on the fly, enable the <b>Use request queue</b> option.<br><br>For details, see <a href='https://apify.com/apify/web-scraper#start-urls' target='_blank' rel='noopener'>Start URLs</a> in README.",
+            "prefill": [
+                { "url": "https://www.amazon.com/b?ie=UTF8&node=11392907011" }
+            ],
+            "editor": "requestListSources"
+        },
+        "type": {
+            "title": "Type of Crawler",
+            "type": "string",
+            "description": "Which type of SDK Crawler will be used",
+            "enum": ["cheerio", "puppeteer"],
+            "default": "cheerio"
+        },
+        "linkSelector": {
+            "title": "Link selector",
+            "type": "string",
+            "description": "A CSS selector saying which links on the page (<code>&lt;a&gt;</code> elements with <code>href</code> attribute) shall be followed and added to the request queue. This setting only applies if <b>Use request queue</b> is enabled. To filter the links added to the queue, use the <b>Pseudo-URLs</b> setting.<br><br>If <b>Link selector</b> is empty, the page links are ignored.<br><br>For details, see <a href='https://apify.com/apify/web-scraper#link-selector' target='_blank' rel='noopener'>Link selector</a> in README.",
+            "editor": "textfield",
+            "prefill": "a[href]"
+        },
+        "pseudoUrls": {
+            "title": "Pseudo-URLs",
+            "type": "array",
+            "description": "Specifies what kind of URLs found by <b>Link selector</b> should be added to the request queue. A pseudo-URL is a URL with regular expressions enclosed in <code>[]</code> brackets, e.g. <code>http://www.example.com/[.*]</code>. This setting only applies if the <b>Use request queue</b> option is enabled.<br><br>If <b>Pseudo-URLs</b> are omitted, the actor enqueues all links matched by the <b>Link selector</b>.<br><br>For details, see <a href='https://apify.com/apify/web-scraper#pseudo-urls' target='_blank' rel='noopener'>Pseudo-URLs</a> in README.",
+            "editor": "pseudoUrls",
+            "default": [],
+            "prefill": [
+                {
+                    "purl": "https://www.amazon.com[.*]/dp/[.*]"
+                }
+            ]
+        },
+        "proxyConfiguration": {
+            "title": "Proxy configuration",
+            "type": "object",
+            "description": "Specifies proxy servers that will be used by the scraper in order to hide its origin.<br><br>For details, see <a href='https://apify.com/apify/web-scraper#proxy-configuration' target='_blank' rel='noopener'>Proxy configuration</a> in README.",
+            "prefill": { "useApifyProxy": false },
+            "default": {},
+            "editor": "proxy"
+        },
+        "replicateStartUrls": {
+            "title": "Replicate Start URLs",
+            "type": "integer",
+            "description": "Will access each Start URL multiple times. Useful to test the same URL or bypass blocking of the first page.",
+            "default": 0
+        },
+        "maxPagesPerCrawl": {
+            "title": "Max pages per run",
+            "type": "integer",
+            "description": "The maximum number of pages that the scraper will load. The scraper will stop when this limit is reached. It's always a good idea to set this limit in order to prevent excess platform usage for misconfigured scrapers. Note that the actual number of pages loaded might be slightly higher than this value.<br><br>If set to <code>0</code>, there is no limit.",
+            "minimum": 0,
+            "default": 100
+        },
+        "maxConcurrency": {
+            "title": "Max concurrency",
+            "type": "integer",
+            "description": "Specified the maximum number of pages that can be processed by the scraper in parallel. The scraper automatically increases and decreases concurrency based on available system resources. This option enables you to set an upper limit, for example to reduce the load on a target website.",
+            "minimum": 1,
+            "default": 50
+        }
+    },
+    "required": ["startUrls"]
+}

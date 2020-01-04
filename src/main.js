@@ -13,7 +13,7 @@ Apify.main(async () => {
         pseudoUrls = [],
         linkSelector,
         maxConcurrency,
-        maxRequestsPerCrawl,
+        maxPagesPerCrawl,
         saveSnapshots = false,
         type = 'cheerio',
         proxyConfiguration = { useApifyProxy: true },
@@ -25,13 +25,13 @@ Apify.main(async () => {
         : null;
 
     const defaultState = {
-        total: 0,
-        timeouted: 0,
-        failedToLoadOther: 0,
-        accessDenied: 0,
-        recaptcha: 0,
-        distilCaptcha: 0,
+        timeouted: [],
+        failedToLoadOther: [],
+        accessDenied: [],
+        recaptcha: [],
+        distilCaptcha: [],
         statusCodes: {},
+        total: [],
     };
 
     const state = (await Apify.getValue('STATE')) || defaultState;
@@ -53,7 +53,17 @@ Apify.main(async () => {
     }
 
     const handlePageFunction = async ({ request, $, html, page, response }) => {
-        state.total++;
+        let snapshotUrl;
+        if (saveSnapshots) {
+            const key = `SNAPSHOT-${Math.random().toString()}`;
+            if (page) {
+                await Apify.utils.puppeteer.saveSnapshot(page, { key });
+            } else {
+                await Apify.setValue(key, html, { contentType: 'text/html' });
+            }
+            snapshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}?disableRedirect=true`
+        }
+        state.total.push({ url: request.url, snapshotUrl });
 
         let statusCode;
         // means Cheerio
@@ -64,9 +74,9 @@ Apify.main(async () => {
         }
 
         if (!state.statusCodes[statusCode]) {
-            state.statusCodes[statusCode] = 0;
+            state.statusCodes[statusCode] = [];
         }
-        state.statusCodes[statusCode]++;
+        state.statusCodes[statusCode].push({ url: request.url, snapshotUrl });
 
         if (!$) {
             html = await page.content();
@@ -75,7 +85,7 @@ Apify.main(async () => {
         const testResult = testHtml($);
         for (const [testCase, wasFound] of Object.entries(testResult)) {
             if (wasFound) {
-                state[testCase]++;
+                state[testCase].push({ url: request.url, snapshotUrl });
             }
         }
 
@@ -83,7 +93,7 @@ Apify.main(async () => {
             await Apify.utils.enqueueLinks({
                 $,
                 selector: linkSelector,
-                pseudoUrls: pseudoUrls.map((req) => new Apify.PseudoUrl(req.url)),
+                pseudoUrls: pseudoUrls.map((req) => new Apify.PseudoUrl(req.purl)),
                 requestQueue,
                 baseUrl: request.loadedUrl,
                 transformRequestFunction: (request) => {
@@ -92,41 +102,31 @@ Apify.main(async () => {
                 }
             });
         }
-
-
-        if (saveSnapshots) {
-            const key = `SNAPSHOT-${Math.random().toString()}`;
-            if (page) {
-                await Apify.utils.puppeteer.saveSnapshot(page, { key });
-            } else {
-                await Apify.setValue(key, html, { contentType: 'text/html' });
-            }
-        }
     }
 
     const handleFailedRequestFunction = ({ request }) => {
-        state.total++;
-        const error = request.errorMessages[0]
+        state.total.push({ url: request.url });
+        const error = request.errorMessages[0];
         console.log(`Request failed --- ${request.url}\n${error}`)
         if (error.includes('request timed out')) {
-            state.timeouted++;
+            state.timeouted.push({ url: request.url });
         } else {
-            state.failedToLoadOther++;
+            state.failedToLoadOther.push({ url: request.url });
         }
-        // CheerioCrawler obscures status code >=500 to a tring message so we have to parse it
+        // CheerioCrawler obscures status code >=500 to a string message so we have to parse it
         const maybeStatusCheerio = error.match(/CheerioCrawler: (\d\d\d) - Internal Server Error/);
         if (maybeStatusCheerio) {
             const statusCode = Number(maybeStatusCheerio[1]);
             if (!state.statusCodes[statusCode]) {
-                state.statusCodes[statusCode] = 0;
+                state.statusCodes[statusCode] = [];
             }
-            state.statusCodes[statusCode]++;
+            state.statusCodes[statusCode].push({ url: request.url });
         }
     }
 
     const basicOptions = {
         maxRequestRetries: 0,
-        maxRequestsPerCrawl,
+        maxRequestsPerCrawl: maxPagesPerCrawl,
         maxConcurrency,
         requestQueue,
         handlePageFunction,
