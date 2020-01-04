@@ -58,17 +58,21 @@ Apify.main(async () => {
     }
 
     const handlePageFunction = async ({ request, $, html, page, response }) => {
-        let snapshotUrl;
+        let screenshotUrl;
+        let htmlUrl;
         if (saveSnapshots) {
             const key = `SNAPSHOT-${Math.random().toString()}`;
             if (page) {
                 await Apify.utils.puppeteer.saveSnapshot(page, { key });
+                screenshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`
+                htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             } else {
                 await Apify.setValue(key, html, { contentType: 'text/html' });
+                htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             }
-            snapshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}?disableRedirect=true`
+
         }
-        state.total.push({ url: request.url, snapshotUrl });
+        state.total.push({ url: request.url, screenshotUrl, htmlUrl });
 
         let statusCode;
         // means Cheerio
@@ -81,7 +85,7 @@ Apify.main(async () => {
         if (!state.statusCodes[statusCode]) {
             state.statusCodes[statusCode] = [];
         }
-        state.statusCodes[statusCode].push({ url: request.url, snapshotUrl });
+        state.statusCodes[statusCode].push({ url: request.url, screenshotUrl, htmlUrl });
 
         if (!$) {
             html = await page.content();
@@ -90,7 +94,7 @@ Apify.main(async () => {
         const testResult = testHtml($);
         for (const [testCase, wasFound] of Object.entries(testResult)) {
             if (wasFound) {
-                state[testCase].push({ url: request.url, snapshotUrl });
+                state[testCase].push({ url: request.url, screenshotUrl, htmlUrl });
             }
         }
 
