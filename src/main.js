@@ -152,4 +152,6 @@ Apify.main(async () => {
 
     await Apify.setValue('OUTPUT', toSimpleState(state));
     await Apify.setValue('DETAILED-OUTPUT', state);
+    console.log(`Simple output: https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`)
+    console.log(`Detailed output: https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/DETAILED-OUTPUT?disableRedirect=true`)
 });
