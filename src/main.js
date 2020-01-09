@@ -149,7 +149,7 @@ Apify.main(async () => {
     const launchPuppeteerOptions = {
         proxyUrl,
         stealth: true,
-        headless: !headfull,
+        headless: headfull ? undefined : true,
         useChrome,
     };
 
