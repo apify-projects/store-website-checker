@@ -74,6 +74,18 @@
             "minimum": 1,
             "default": 10
         },
+        "headfull": {
+            "title": "Headfull browser(XVFB)",
+            "type": "boolean",
+            "description": "Only works for puppeteer type",
+            "default": false
+        },
+        "useChrome": {
+            "title": "Use Chrome",
+            "type": "boolean",
+            "description": "Only works for puppeteer type. Be careful that Chrome is not guaranteed to work with Puppeteer.",
+            "default": false
+        },
         "saveSnapshots": {
             "title": "Save Snapshots",
             "type": "boolean",

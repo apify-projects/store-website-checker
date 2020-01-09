@@ -20,6 +20,8 @@ Apify.main(async () => {
         proxyConfiguration = { useApifyProxy: true },
         replicateStartUrls = 0,
         retireInstanceAfterRequestCount = 10,
+        headfull = false,
+        useChrome = false,
     } = input;
 
     const proxyUrl = proxyConfiguration.useApifyProxy
@@ -147,6 +149,8 @@ Apify.main(async () => {
     const launchPuppeteerOptions = {
         proxyUrl,
         stealth: true,
+        headless: !headfull,
+        useChrome,
     };
 
     const puppeteerPoolOptions = { retireInstanceAfterRequestCount };
