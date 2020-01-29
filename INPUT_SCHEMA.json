@@ -86,6 +86,12 @@
             "description": "Only works for puppeteer type. Be careful that Chrome is not guaranteed to work with Puppeteer.",
             "default": false
         },
+        "useGoogleBotHeaders": {
+            "title": "Use Google Bot headers",
+            "type": "boolean",
+            "description": "This option will allow you to bypass protection and/or paywall on some sites. Use with caution as it might get blocked.",
+            "default": false
+        },
         "saveSnapshots": {
             "title": "Save Snapshots",
             "type": "boolean",

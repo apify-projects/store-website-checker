@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 
 const { testHtml } = require('./checkers.js');
 const { toSimpleState } = require('./utils.js');
+const { GOOGLE_BOT_HEADERS } = require('./constants.js');
 
 Apify.main(async () => {
     const input = await Apify.getInput();
@@ -22,6 +23,7 @@ Apify.main(async () => {
         retireInstanceAfterRequestCount = 10,
         headfull = false,
         useChrome = false,
+        useGoogleBotHeaders = false,
     } = input;
 
     const proxyUrl = proxyConfiguration.useApifyProxy
@@ -54,9 +56,16 @@ Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
 
     for (const req of startUrls) {
-        await requestQueue.addRequest({ ...req, headers: {'User-Agent': Apify.utils.getRandomUserAgent() } });
+        await requestQueue.addRequest({
+            ...req,
+            headers: useGoogleBotHeaders ? GOOGLE_BOT_HEADERS : { 'User-Agent': Apify.utils.getRandomUserAgent() },
+        });
         for (let i = 0; i < replicateStartUrls; i++) {
-            await requestQueue.addRequest({ ...req, uniqueKey: Math.random().toString(), headers: {'User-Agent': Apify.utils.getRandomUserAgent() } });
+            await requestQueue.addRequest({
+                ...req,
+                uniqueKey: Math.random().toString(),
+                headers: useGoogleBotHeaders ? GOOGLE_BOT_HEADERS : { 'User-Agent': Apify.utils.getRandomUserAgent() },
+            });
         }
     }
 
@@ -73,7 +82,6 @@ Apify.main(async () => {
                 await Apify.setValue(`${key}.html`, html, { contentType: 'text/html' });
                 htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             }
-
         }
         state.total.push({ url: request.url, screenshotUrl, htmlUrl });
 
@@ -109,12 +117,12 @@ Apify.main(async () => {
                 requestQueue,
                 baseUrl: request.loadedUrl,
                 transformRequestFunction: (request) => {
-                    request.headers = { ...request.headers, 'User-Agent': Apify.utils.getRandomUserAgent() }
+                    request.headers = useGoogleBotHeaders ? GOOGLE_BOT_HEADERS : { 'User-Agent': Apify.utils.getRandomUserAgent() };
                     return request;
-                }
+                },
             });
         }
-    }
+    };
 
     const handleFailedRequestFunction = ({ request }) => {
         state.total.push({ url: request.url });
@@ -134,7 +142,15 @@ Apify.main(async () => {
             }
             state.statusCodes[statusCode].push({ url: request.url });
         }
-    }
+    };
+
+    const gotoFunction = async ({ request, page }) => {
+        await page.setExtraHTTPHeaders({
+            'Referer': GOOGLE_BOT_HEADERS.Referer,
+            'X-Forwarded-For': GOOGLE_BOT_HEADERS['X-Forwarded-For'],
+        });
+        return page.goto(request.url, { timeout: 60000 });
+    };
 
     const basicOptions = {
         maxRequestRetries: 0,
@@ -151,13 +167,14 @@ Apify.main(async () => {
         stealth: true,
         headless: headfull ? undefined : true,
         useChrome,
+        userAgent: useGoogleBotHeaders ? GOOGLE_BOT_HEADERS['User-Agent'] : Apify.utils.getRandomUserAgent(),
     };
 
     const puppeteerPoolOptions = { retireInstanceAfterRequestCount };
 
     const crawler = type === 'cheerio'
         ? new Apify.CheerioCrawler({ ...basicOptions, proxyUrls: proxyUrl ? [proxyUrl] : null })
-        : new Apify.PuppeteerCrawler({ ...basicOptions, launchPuppeteerOptions, puppeteerPoolOptions });
+        : new Apify.PuppeteerCrawler({ ...basicOptions, launchPuppeteerOptions, puppeteerPoolOptions, gotoFunction });
 
     await crawler.run();
 
