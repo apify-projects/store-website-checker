@@ -23,6 +23,7 @@ Apify.main(async () => {
         retireInstanceAfterRequestCount = 10,
         headfull = false,
         useChrome = false,
+        waitFor,
         useGoogleBotHeaders = false,
     } = input;
 
@@ -70,6 +71,12 @@ Apify.main(async () => {
     }
 
     const handlePageFunction = async ({ request, $, html, page, response }) => {
+        if (page) {
+            // We wait for number in ms or a selector
+            const maybeNumber = Number(waitFor);
+            await page.waitFor(maybeNumber || maybeNumber === 0 ? maybeNumber : waitFor);
+        }
+
         let screenshotUrl;
         let htmlUrl;
         if (saveSnapshots) {

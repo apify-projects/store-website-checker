@@ -86,6 +86,12 @@
             "description": "Only works for puppeteer type. Be careful that Chrome is not guaranteed to work with Puppeteer.",
             "default": false
         },
+        "waitFor": {
+            "title": "Wait for",
+            "type": "string",
+            "description": "Only works for puppeteer type. Will wait on each page. You can provide number in ms or a selector.",
+            "editor": "textfield"
+        },
         "useGoogleBotHeaders": {
             "title": "Use Google Bot headers",
             "type": "boolean",
