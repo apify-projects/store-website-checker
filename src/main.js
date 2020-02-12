@@ -167,6 +167,7 @@ Apify.main(async () => {
         handlePageFunction,
         handleFailedRequestFunction,
         proxyUrls: proxyUrl ? [proxyUrl] : null,
+        additionalMimeTypes: ['application/xml'], // For CheerioCrawler
     };
 
     const launchPuppeteerOptions = {
