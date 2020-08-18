@@ -1,6 +1,8 @@
 const Apify = require('apify');
 const cheerio = require('cheerio');
 
+const { log } = Apify.utils;
+
 const { testHtml } = require('./checkers.js');
 const { toSimpleState } = require('./utils.js');
 const { GOOGLE_BOT_HEADERS } = require('./constants.js');
@@ -27,8 +29,21 @@ Apify.main(async () => {
         useGoogleBotHeaders = false,
     } = input;
 
+    if (type === 'cheerio') {
+        log.info('Running a Cheerio Crawler. Cheerio downloads only initial HTML. If you need to render JavaScript or wait on a page for data to load, choose Puppeteer as Type of Crawler.');
+        if (waitFor) {
+            log.warning(`waitFor parameter doesn't work in Cheerio. If you need to wait, please choose Puppeteer as Type of Crawler.`);
+        }
+        if (headfull) {
+            log.warning(`headfull parameter doesn't work in Cheerio. If you need to use headfull browser, please choose Puppeteer as Type of Crawler.`);
+        }
+        if (useChrome) {
+            log.warning(`useChrome parameter doesn't work in Cheerio. If you need to use Chrome browser, please choose Puppeteer as Type of Crawler.`);
+        }
+    }
+
     const proxyUrl = proxyConfiguration.useApifyProxy
-        ? Apify.getApifyProxyUrl({ groups: proxyConfiguration.apifyProxyGroups, country: proxyConfiguration.apifyProxyCountry})
+        ? Apify.getApifyProxyUrl({ groups: proxyConfiguration.apifyProxyGroups, country: proxyConfiguration.apifyProxyCountry })
         : null;
 
     const defaultState = {
@@ -51,7 +66,7 @@ Apify.main(async () => {
     }, 10000);
 
     setInterval(() => {
-        console.dir(toSimpleState(state))
+        console.dir(toSimpleState(state));
     }, 10000);
 
     const requestQueue = await Apify.openRequestQueue();
