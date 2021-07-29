@@ -12,10 +12,15 @@ const recaptcha = ($) => {
         || $('iframe[src*="/recaptcha/"]').length > 0
 }
 
+const hCaptcha = ($) => {
+    return $('[action="/errors/validateCaptcha"]').length > 0;
+}
+
 module.exports.testHtml = ($) => {
     return {
         distilCaptcha: distilCaptcha($),
         accessDenied: accessDenied($),
         recaptcha: recaptcha($),
+        hCaptcha: hCaptcha($),
     };
 }

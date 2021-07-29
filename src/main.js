@@ -5,7 +5,6 @@ const { log } = Apify.utils;
 
 const { testHtml } = require('./checkers.js');
 const { toSimpleState } = require('./utils.js');
-const { GOOGLE_BOT_HEADERS } = require('./constants.js');
 
 Apify.main(async () => {
     const input = await Apify.getInput();
@@ -26,7 +25,6 @@ Apify.main(async () => {
         headfull = false,
         useChrome = false,
         waitFor,
-        useGoogleBotHeaders = false,
     } = input;
 
     if (type === 'cheerio') {
@@ -42,9 +40,10 @@ Apify.main(async () => {
         }
     }
 
-    const proxyUrl = proxyConfiguration.useApifyProxy
-        ? Apify.getApifyProxyUrl({ groups: proxyConfiguration.apifyProxyGroups, country: proxyConfiguration.apifyProxyCountry })
-        : null;
+    const proxyConfigurationClass = await Apify.createProxyConfiguration({
+        groups: proxyConfiguration.apifyProxyGroups,
+        countryCode: proxyConfiguration.apifyProxyCountry,
+    })
 
     const defaultState = {
         timeouted: [],
@@ -52,7 +51,9 @@ Apify.main(async () => {
         accessDenied: [],
         recaptcha: [],
         distilCaptcha: [],
+        hCaptcha: [],
         statusCodes: {},
+        success: [],
         total: [],
     };
 
@@ -74,22 +75,24 @@ Apify.main(async () => {
     for (const req of startUrls) {
         await requestQueue.addRequest({
             ...req,
-            headers: useGoogleBotHeaders ? GOOGLE_BOT_HEADERS : { 'User-Agent': Apify.utils.getRandomUserAgent() },
         });
         for (let i = 0; i < replicateStartUrls; i++) {
             await requestQueue.addRequest({
                 ...req,
                 uniqueKey: Math.random().toString(),
-                headers: useGoogleBotHeaders ? GOOGLE_BOT_HEADERS : { 'User-Agent': Apify.utils.getRandomUserAgent() },
             });
         }
     }
 
-    const handlePageFunction = async ({ request, $, html, page, response }) => {
+    const handlePageFunction = async ({ request, $, body, page, response }) => {
         if (page && waitFor) {
             // We wait for number in ms or a selector
             const maybeNumber = Number(waitFor);
-            await page.waitFor(maybeNumber || maybeNumber === 0 ? maybeNumber : waitFor);
+            if (maybeNumber || maybeNumber === 0) {
+                await page.waitForTimeout(maybeNumber)
+            } else {
+                await page.waitForSelector(waitFor)
+            }
         }
 
         let screenshotUrl;
@@ -101,7 +104,7 @@ Apify.main(async () => {
                 screenshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`
                 htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             } else {
-                await Apify.setValue(`${key}.html`, html, { contentType: 'text/html' });
+                await Apify.setValue(`${key}.html`, body, { contentType: 'text/html' });
                 htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
             }
         }
@@ -121,15 +124,32 @@ Apify.main(async () => {
         state.statusCodes[statusCode].push({ url: request.url, screenshotUrl, htmlUrl });
 
         if (!$) {
-            html = await page.content();
+            const html = await page.content();
             $ = cheerio.load(html);
         }
+
+        captchas = [];
         const testResult = testHtml($);
         for (const [testCase, wasFound] of Object.entries(testResult)) {
             if (wasFound) {
+                captchas.push(testCase);
                 state[testCase].push({ url: request.url, screenshotUrl, htmlUrl });
             }
         }
+
+        const wasSuccess = statusCode < 400 && captchas.length === 0;
+        if (wasSuccess) {
+            state.wasSuccess.push({ url: request.url, screenshotUrl, htmlUrl });
+        }
+
+        await Apify.pushData({
+            url: request.url,
+            screenshotUrl,
+            htmlUrl,
+            statusCode,
+            captchas,
+            wasSuccess,
+        })
 
         if (linkSelector) {
             await Apify.utils.enqueueLinks({
@@ -138,10 +158,6 @@ Apify.main(async () => {
                 pseudoUrls: pseudoUrls.map((req) => new Apify.PseudoUrl(req.purl)),
                 requestQueue,
                 baseUrl: request.loadedUrl,
-                transformRequestFunction: (request) => {
-                    request.headers = useGoogleBotHeaders ? GOOGLE_BOT_HEADERS : { 'User-Agent': Apify.utils.getRandomUserAgent() };
-                    return request;
-                },
             });
         }
     };
@@ -156,7 +172,7 @@ Apify.main(async () => {
             state.failedToLoadOther.push({ url: request.url });
         }
         // CheerioCrawler obscures status code >=500 to a string message so we have to parse it
-        const maybeStatusCheerio = error.match(/CheerioCrawler: (\d\d\d) - Internal Server Error/);
+        const maybeStatusCheerio = error.match(/(\d\d\d) - Internal Server Error/);
         if (maybeStatusCheerio) {
             const statusCode = Number(maybeStatusCheerio[1]);
             if (!state.statusCodes[statusCode]) {
@@ -166,14 +182,6 @@ Apify.main(async () => {
         }
     };
 
-    const gotoFunction = async ({ request, page }) => {
-        await page.setExtraHTTPHeaders({
-            'Referer': GOOGLE_BOT_HEADERS.Referer,
-            'X-Forwarded-For': GOOGLE_BOT_HEADERS['X-Forwarded-For'],
-        });
-        return page.goto(request.url, { timeout: 60000 });
-    };
-
     const basicOptions = {
         maxRequestRetries: 0,
         maxRequestsPerCrawl: maxPagesPerCrawl,
@@ -181,23 +189,33 @@ Apify.main(async () => {
         requestQueue,
         handlePageFunction,
         handleFailedRequestFunction,
-        proxyUrls: proxyUrl ? [proxyUrl] : null,
-        additionalMimeTypes: ['application/xml'], // For CheerioCrawler
+        proxyConfiguration: proxyConfigurationClass,
+        useSessionPool: false,
     };
 
-    const launchPuppeteerOptions = {
-        proxyUrl,
-        stealth: true,
-        headless: headfull ? undefined : true,
-        useChrome,
-        userAgent: useGoogleBotHeaders ? GOOGLE_BOT_HEADERS['User-Agent'] : Apify.utils.getRandomUserAgent(),
-    };
-
-    const puppeteerPoolOptions = { retireInstanceAfterRequestCount };
-
-    const crawler = type === 'cheerio'
-        ? new Apify.CheerioCrawler({ ...basicOptions, proxyUrls: proxyUrl ? [proxyUrl] : null })
-        : new Apify.PuppeteerCrawler({ ...basicOptions, launchPuppeteerOptions, puppeteerPoolOptions, gotoFunction });
+    let crawler;
+    if (type === 'cheerio') {
+        crawler =  new Apify.CheerioCrawler({
+            ...basicOptions,
+            additionalMimeTypes: ['application/xml'],
+        });
+        // We don't want the crawler to throw errors on bad statuses
+        crawler._throwOnBlockedRequest = () => {}
+    } else if (type === 'puppeteer') {
+        crawler = new Apify.PuppeteerCrawler({
+            ...basicOptions,
+            launchContext: {
+                stealth: true,
+                useChrome,
+                launchOptions: {
+                    headless: headfull ? undefined : true,
+                }
+            },
+            browserPoolOptions: {
+                retireBrowserAfterPageCount: retireInstanceAfterRequestCount,
+            },
+        });
+    } 
 
     await crawler.run();
 

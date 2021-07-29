@@ -92,17 +92,11 @@
             "description": "Only works for puppeteer type. Will wait on each page. You can provide number in ms or a selector.",
             "editor": "textfield"
         },
-        "useGoogleBotHeaders": {
-            "title": "Use Google Bot headers",
-            "type": "boolean",
-            "description": "This option will allow you to bypass protection and/or paywall on some sites. Use with caution as it might get blocked.",
-            "default": false
-        },
         "saveSnapshots": {
             "title": "Save Snapshots",
             "type": "boolean",
             "description": "Will save HTML for Cheerio and HTML + screenshot for Puppeteer",
-            "default": false
+            "default": true
         }
     },
     "required": ["startUrls"]
