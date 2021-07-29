@@ -139,7 +139,7 @@ Apify.main(async () => {
 
         const wasSuccess = statusCode < 400 && captchas.length === 0;
         if (wasSuccess) {
-            state.wasSuccess.push({ url: request.url, screenshotUrl, htmlUrl });
+            state.success.push({ url: request.url, screenshotUrl, htmlUrl });
         }
 
         await Apify.pushData({
