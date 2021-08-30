@@ -1,0 +1,14 @@
+{
+	"extends": "@apify/tsconfig",
+	"compilerOptions": {
+		"outDir": "dist",
+		"module": "ESNext",
+		"checkJs": true,
+		"skipLibCheck": true
+	},
+	"include": [
+		"_internal/**/*",
+		"common/**/*",
+		"starter/**/*"
+	]
+}

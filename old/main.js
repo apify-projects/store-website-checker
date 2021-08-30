@@ -43,32 +43,16 @@ Apify.main(async () => {
     const proxyConfigurationClass = await Apify.createProxyConfiguration({
         groups: proxyConfiguration.apifyProxyGroups,
         countryCode: proxyConfiguration.apifyProxyCountry,
-    })
+    });
 
     const defaultState = {
-        timeouted: [],
-        failedToLoadOther: [],
-        accessDenied: [],
         recaptcha: [],
         distilCaptcha: [],
         hCaptcha: [],
         statusCodes: {},
-        success: [],
-        total: [],
     };
 
     const state = (await Apify.getValue('STATE')) || defaultState;
-    Apify.events.on('migrating', async () => {
-        await Apify.setValue('STATE', state);
-    });
-
-    setInterval(async () => {
-        await Apify.setValue('STATE', state);
-    }, 10000);
-
-    setInterval(() => {
-        console.dir(toSimpleState(state));
-    }, 10000);
 
     const requestQueue = await Apify.openRequestQueue();
 
@@ -89,9 +73,9 @@ Apify.main(async () => {
             // We wait for number in ms or a selector
             const maybeNumber = Number(waitFor);
             if (maybeNumber || maybeNumber === 0) {
-                await page.waitForTimeout(maybeNumber)
+                await page.waitForTimeout(maybeNumber);
             } else {
-                await page.waitForSelector(waitFor)
+                await page.waitForSelector(waitFor);
             }
         }
 
@@ -101,11 +85,11 @@ Apify.main(async () => {
             const key = `SNAPSHOT-${Math.random().toString()}`;
             if (page) {
                 await Apify.utils.puppeteer.saveSnapshot(page, { key });
-                screenshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`
-                htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
+                screenshotUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`;
+                htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
             } else {
                 await Apify.setValue(`${key}.html`, body, { contentType: 'text/html' });
-                htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`
+                htmlUrl = `https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
             }
         }
         state.total.push({ url: request.url, screenshotUrl, htmlUrl });
@@ -149,7 +133,7 @@ Apify.main(async () => {
             statusCode,
             captchas,
             wasSuccess,
-        })
+        });
 
         if (linkSelector) {
             await Apify.utils.enqueueLinks({
@@ -165,7 +149,7 @@ Apify.main(async () => {
     const handleFailedRequestFunction = ({ request }) => {
         state.total.push({ url: request.url });
         const error = request.errorMessages[0];
-        console.log(`Request failed --- ${request.url}\n${error}`)
+        console.log(`Request failed --- ${request.url}\n${error}`);
         if (error.includes('request timed out')) {
             state.timeouted.push({ url: request.url });
         } else {
@@ -195,12 +179,12 @@ Apify.main(async () => {
 
     let crawler;
     if (type === 'cheerio') {
-        crawler =  new Apify.CheerioCrawler({
+        crawler = new Apify.CheerioCrawler({
             ...basicOptions,
             additionalMimeTypes: ['application/xml'],
         });
         // We don't want the crawler to throw errors on bad statuses
-        crawler._throwOnBlockedRequest = () => {}
+        crawler._throwOnBlockedRequest = () => {};
     } else if (type === 'puppeteer') {
         crawler = new Apify.PuppeteerCrawler({
             ...basicOptions,
@@ -209,18 +193,18 @@ Apify.main(async () => {
                 useChrome,
                 launchOptions: {
                     headless: headfull ? undefined : true,
-                }
+                },
             },
             browserPoolOptions: {
                 retireBrowserAfterPageCount: retireInstanceAfterRequestCount,
             },
         });
-    } 
+    }
 
     await crawler.run();
 
     await Apify.setValue('OUTPUT', toSimpleState(state));
     await Apify.setValue('DETAILED-OUTPUT', state);
-    console.log(`Simple output: https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`)
-    console.log(`Detailed output: https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/DETAILED-OUTPUT?disableRedirect=true`)
+    console.log(`Simple output: https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`);
+    console.log(`Detailed output: https://api.apify.com/v2/key-value-stores/${Apify.getEnv().defaultKeyValueStoreId}/records/DETAILED-OUTPUT?disableRedirect=true`);
 });
