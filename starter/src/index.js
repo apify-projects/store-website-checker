@@ -37,7 +37,7 @@ Apify.main(async () => {
 
     log.info(`Preparing to process ${state.totalUrls} URLs...`);
 
-    // Check for revivals first, in the event the actor crashed
+    // Check for revivals first, in the event the actor crashed, and handle those to the end
     await revivePendingConfigs(state);
 
     const { maxConcurrentDomainsChecked } = input;
@@ -49,6 +49,8 @@ Apify.main(async () => {
         if (domainsToCheck.length === 0) break;
 
         state.pendingConfigs = domainsToCheck;
+        // Save the state right off the bat, in the event the actor dies right after
+        await Apify.setValue('STATE', state);
 
         const promises = [];
 

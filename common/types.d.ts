@@ -71,12 +71,21 @@ export interface PreparedActorConfig {
     runId?: string;
 }
 
+export interface CreateActorRunConfig {
+    checkerId: string;
+    configs: PreparedActorConfig[];
+    input: ActorInputData;
+    urlData: UrlInput;
+    playwrightBrowser?: 'chrome' | 'firefox' | 'webkit';
+}
+
 // --- OUTPUT ---
 
 export interface ActorCheckDetailedOutput {
     // Set by waitForRunToFinishAndPushData
     proxyUsed?: string;
     checkerType: 'cheerio' | 'puppeteer' | 'playwright';
+    playwrightBrowser?: 'chrome' | 'firefox' | 'webkit';
     computeUnitsUsedForThisCheck: number;
     // (totalPages.length / computeUnitsUsedForThisCheck) yields the amount of pages checkable per compute unit
     pagesPerComputeUnit: number;

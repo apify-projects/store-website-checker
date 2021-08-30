@@ -26,12 +26,21 @@ export async function waitForRunToFinish(runConfig, runId) {
     const output = await run.keyValueStore().getRecord('OUTPUT');
 
     /** @type {{ value: import('../../../common/types').ActorCheckSimplifiedOutput }} */
+    // @ts-expect-error Casting to known type
     const { value } = output;
 
     value.computeUnitsUsedForThisCheck = Number(computeUnits.toFixed(4));
     value.pagesPerComputeUnit = Number((value.totalPages / computeUnits).toFixed(2));
     value.proxyUsed = runConfig.proxyUsed;
     value.checkerType = actorIdToCheckerType(runConfig.actorId);
+
+    if (runConfig.input['playwright.chrome']) {
+        value.playwrightBrowser = 'chrome';
+    } else if (runConfig.input['playwright.firefox']) {
+        value.playwrightBrowser = 'firefox';
+    } else if (runConfig.input['playwright.webkit']) {
+        value.playwrightBrowser = 'webkit';
+    }
 
     await pushData(value);
 }

@@ -13,7 +13,7 @@ export async function revivePendingConfigs(state) {
         for (const run of domainRunConfigs) {
             if (run.runId) {
                 log.info([
-                    `Waiting for run ${run.runId} to finish.`,
+                    `Recovered run ${run.runId} after actor crash - waiting for it to finish.`,
                     `You can monitor the status of the run by going to https://console.apify.com/actors/runs/${run.runId}`,
                 ].join('\n'));
                 promises.push(waitForRunToFinish(run, run.runId));

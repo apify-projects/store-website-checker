@@ -8,9 +8,42 @@ export function convertInputToActorConfigs(input) {
     for (const urlData of input.urlsToCheck) {
         /** @type {import('../../../common/types').PreparedActorConfig[]} */
         const urlConfigs = [];
-        if (input['checkers.cheerio']) createActorRunConfigForCrawler(urlConfigs, input, urlData, ACTOR_CHEERIO_CHECKER_NAME);
-        if (input['checkers.puppeteer']) createActorRunConfigForCrawler(urlConfigs, input, urlData, ACTOR_PUPPETEER_CHECKER_NAME);
-        if (input['checkers.playwright']) createActorRunConfigForCrawler(urlConfigs, input, urlData, ACTOR_PLAYWRIGHT_CHECKER_NAME);
+        if (input['checkers.cheerio']) {
+            createActorRunConfigForCrawler({ configs: urlConfigs, input, urlData, checkerId: ACTOR_CHEERIO_CHECKER_NAME });
+        }
+        if (input['checkers.puppeteer']) {
+            createActorRunConfigForCrawler({ configs: urlConfigs, input, urlData, checkerId: ACTOR_PUPPETEER_CHECKER_NAME });
+        }
+        if (input['checkers.playwright']) {
+            // Create a run config for each playwright browser
+            if (input['playwright.chrome']) {
+                createActorRunConfigForCrawler({
+                    configs: urlConfigs,
+                    input,
+                    urlData,
+                    checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
+                    playwrightBrowser: 'chrome',
+                });
+            }
+            if (input['playwright.firefox']) {
+                createActorRunConfigForCrawler({
+                    configs: urlConfigs,
+                    input,
+                    urlData,
+                    checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
+                    playwrightBrowser: 'firefox',
+                });
+            }
+            if (input['playwright.webkit']) {
+                createActorRunConfigForCrawler({
+                    configs: urlConfigs,
+                    input,
+                    urlData,
+                    checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
+                    playwrightBrowser: 'webkit',
+                });
+            }
+        }
 
         configs.push(urlConfigs);
     }
@@ -19,12 +52,9 @@ export function convertInputToActorConfigs(input) {
 }
 
 /**
- * @param {import('../../../common/types').PreparedActorConfig[]} configs
- * @param {import('../../../common/types').ActorInputData} input
- * @param {import('../../../common/types').UrlInput} urlData,
- * @param {string} checkerId
+ * @param {import('../../../common/types').CreateActorRunConfig} args_0
  */
-function createActorRunConfigForCrawler(configs, input, urlData, checkerId) {
+function createActorRunConfigForCrawler({ configs, input, urlData, checkerId, playwrightBrowser }) {
     for (const group of input.proxyConfiguration.apifyProxyGroups ?? ['auto']) {
         /** @type {import('../../../common/types').PreparedActorConfig} */
         const config = {
@@ -57,10 +87,8 @@ function createActorRunConfigForCrawler(configs, input, urlData, checkerId) {
             config.input['puppeteer.headfull'] = input['puppeteer.headfull'];
             config.input['puppeteer.useChrome'] = input['puppeteer.useChrome'];
             config.input['puppeteer.waitFor'] = input['puppeteer.waitFor'];
-        } else if (checkerId === ACTOR_PLAYWRIGHT_CHECKER_NAME) {
-            config.input['playwright.chrome'] = input['playwright.chrome'];
-            config.input['playwright.firefox'] = input['playwright.firefox'];
-            config.input['playwright.webkit'] = input['playwright.webkit'];
+        } else if (checkerId === ACTOR_PLAYWRIGHT_CHECKER_NAME && playwrightBrowser) {
+            config.input[`playwright.${playwrightBrowser}`] = input[`playwright.${playwrightBrowser}`];
         }
 
         configs.push(config);
