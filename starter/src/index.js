@@ -62,7 +62,11 @@ Apify.main(async () => {
         for (const domainRunConfigs of domainsToCheck) {
             for (const run of domainRunConfigs) {
                 const result = await startRun(run);
-                log.info(`Starting run for "${run.url}" with actor ${run.actorId} and proxy ${run.proxyUsed ?? 'auto'}.`);
+                log.info(
+                    `Starting run for "${run.url}" with actor ${run.actorId} and ${
+                        run.input.proxyConfiguration.useApifyProxy ? `proxy ${run.proxyUsed ?? 'auto'}` : 'no proxy'
+                    }.`,
+                );
                 log.info(`You can monitor the status of the run by going to https://console.apify.com/actors/runs/${result.id}`);
                 run.runId = result.id;
                 await Apify.setValue('STATE', state);
