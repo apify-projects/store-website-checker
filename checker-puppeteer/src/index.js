@@ -8,7 +8,7 @@ const { log } = Apify.utils;
 const env = Apify.getEnv();
 
 Apify.main(async () => {
-    /** @type {import('./types').CheerioActorInput} */
+    /** @type {import('./types').PuppeteerActorInput} */
     // @ts-expect-error It's not null
     const input = await Apify.getInput();
 
@@ -17,12 +17,7 @@ Apify.main(async () => {
     log.info('Input provided:');
     log.debug(inspect(input, false, 4));
 
-    log.info(
-        [
-            'Running a Cheerio Checker. Cheerio downloads only initial HTML.',
-            'If you need to render JavaScript or wait on a page for data to load, enable Puppeteer or Playwright as Checker Type in the Frontend.',
-        ].join('\n'),
-    );
+    log.info('Running a Puppeteer Checker.');
 
     const {
         maxConcurrentPagesCheckedPerDomain,
@@ -30,6 +25,9 @@ Apify.main(async () => {
         proxyConfiguration,
         urlsToCheck,
         repeatChecksOnProvidedUrls,
+        retireBrowserInstanceAfterRequestCount,
+        'puppeteer.useChrome': useChrome,
+        'puppeteer.headfull': headfull,
     } = input;
 
     const proxy = await Apify.createProxyConfiguration({
@@ -51,7 +49,7 @@ Apify.main(async () => {
     /** @type {import('../../common/types').ActorCheckDetailedOutput} */
     const state = {
         url: urlData.url,
-        checkerType: 'cheerio',
+        checkerType: 'puppeteer',
         simplifiedOutput: `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`,
         detailedOutput: `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/DETAILED-OUTPUT?disableRedirect=true`,
         totalPages: [],
@@ -65,7 +63,7 @@ Apify.main(async () => {
         hCaptcha: [],
     };
 
-    const crawler = new Apify.CheerioCrawler({
+    const crawler = new Apify.PuppeteerCrawler({
         maxRequestRetries: 0,
         maxRequestsPerCrawl: maxNumberOfPagesCheckedPerDomain,
         maxConcurrency: maxConcurrentPagesCheckedPerDomain,
@@ -74,12 +72,19 @@ Apify.main(async () => {
         handleFailedRequestFunction: (requestInput) => handleFailedRequest(state, requestInput),
         proxyConfiguration: proxy,
         useSessionPool: false,
-        additionalMimeTypes: ['application/xml'],
+        launchContext: {
+            stealth: true,
+            useChrome,
+            launchOptions: {
+                // @ts-expect-error Issue in the typings of apify
+                headless: headfull ? undefined : true,
+            },
+        },
+        // @ts-expect-error Might need to correct the typings for this somewhere (probably in apify)
+        browserPoolOptions: {
+            retireBrowserAfterPageCount: retireBrowserInstanceAfterRequestCount,
+        },
     });
-
-    // TODO: Consider making this an option in the CheerioCrawler instead of needing to override a function
-    // We don't want the crawler to throw errors on bad statuses
-    Reflect.set(crawler, '_throwOnBlockedRequest', () => {});
 
     await crawler.run();
 

@@ -50,7 +50,7 @@ export interface ActorInputData {
     // Pass only to puppeteer
     'puppeteer.headfull'?: boolean;
     'puppeteer.useChrome'?: boolean;
-    'puppeteer.waitFor'?: boolean;
+    'puppeteer.waitFor'?: string;
 
     // Pass only to playwright
     'playwright.chrome'?: boolean;

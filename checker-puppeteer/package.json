@@ -1,0 +1,17 @@
+{
+  "name": "website-checker-puppeteer",
+  "version": "1.0.0",
+  "description": "This actor is responsible for checking a url for captchas with puppeteer",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js"
+  },
+  "author": "Vlad Frangu <kingdgrizzle@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "apify": "^2.0.6",
+    "cheerio": "^1.0.0-rc.10",
+    "puppeteer": "*"
+  }
+}
