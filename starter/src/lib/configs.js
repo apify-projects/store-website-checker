@@ -78,7 +78,7 @@ function createActorRunConfigForCrawler({ configs, input, urlData, checkerId, pl
                 retireBrowserInstanceAfterRequestCount: input.retireBrowserInstanceAfterRequestCount,
             },
             params: {
-                memoryMbytes: checkerId === ACTOR_CHEERIO_CHECKER_NAME ? 4096 : 8192,
+                memory: checkerId === ACTOR_CHEERIO_CHECKER_NAME ? 4096 : 8192,
                 timeout: 24 * 3600,
             },
         };

@@ -64,7 +64,7 @@ export interface PreparedActorConfig {
     url: string;
     input: ActorInputData;
     params: {
-        memoryMbytes: number;
+        memory: number;
         timeout: number;
     };
     // This data is set when the config is ran
