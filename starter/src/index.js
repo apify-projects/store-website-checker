@@ -38,7 +38,7 @@ Apify.main(async () => {
     state.preparedConfigs = convertInputToActorConfigs(input);
     state.totalUrls = input.urlsToCheck.length;
 
-    log.info(`Preparing to process ${state.totalUrls} URLs...`);
+    log.info(`Preparing to process ${state.totalUrls} URLs...\n`);
 
     // Check for revivals first, in the event the actor crashed, and handle those to the end
     await revivePendingConfigs(state);
@@ -87,7 +87,7 @@ Apify.main(async () => {
     state.preparedConfigs = [];
     await Apify.setValue('STATE', state);
 
-    log.info(`Checking ${state.totalUrls} URLs completed!`);
+    log.info(`\nChecking ${state.totalUrls} URLs completed!`);
     log.info(`Please go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=html to see the results`);
     log.info(`Go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=json for the JSON output`);
 });
