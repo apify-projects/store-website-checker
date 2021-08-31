@@ -51,6 +51,8 @@ Apify.main(async () => {
         // If we got no more URLs to run, exit the loop
         if (domainsToCheck.length === 0) break;
 
+        log.info(`Starting a batch of ${domainsToCheck.length} URLs to check`);
+
         state.pendingConfigs = domainsToCheck;
         // Save the state right off the bat, in the event the actor dies right after
         await Apify.setValue('STATE', state);
