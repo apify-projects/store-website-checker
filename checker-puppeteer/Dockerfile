@@ -1,4 +1,4 @@
-FROM apify/actor-node:16
+FROM apify/actor-node-chrome:16
 
 # Copy the package.json and package-lock.json files, since they are the only files
 # that affect NPM install in the next step
