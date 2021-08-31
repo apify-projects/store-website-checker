@@ -7,7 +7,7 @@
 		"skipLibCheck": true
 	},
 	"include": [
-		"_internal/**/*",
+		"checker-*/**/*",
 		"common/**/*",
 		"starter/**/*"
 	]

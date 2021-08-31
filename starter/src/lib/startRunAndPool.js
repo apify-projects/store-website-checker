@@ -1,5 +1,4 @@
 import { newClient, pushData } from 'apify';
-import { actorIdToCheckerType } from './constants';
 
 /** @type {import('apify-client').ApifyClient} */
 const client = newClient();
@@ -32,7 +31,6 @@ export async function waitForRunToFinish(runConfig, runId) {
     value.computeUnitsUsedForThisCheck = Number(computeUnits.toFixed(4));
     value.pagesPerComputeUnit = Number((value.totalPages / computeUnits).toFixed(2));
     value.proxyUsed = runConfig.proxyUsed;
-    value.checkerType = actorIdToCheckerType(runConfig.actorId);
 
     if (runConfig.input['playwright.chrome']) {
         value.playwrightBrowser = 'chrome';

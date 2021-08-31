@@ -86,9 +86,9 @@ export interface ActorCheckDetailedOutput {
     proxyUsed?: string;
     checkerType: 'cheerio' | 'puppeteer' | 'playwright';
     playwrightBrowser?: 'chrome' | 'firefox' | 'webkit';
-    computeUnitsUsedForThisCheck: number;
+    computeUnitsUsedForThisCheck?: number;
     // (totalPages.length / computeUnitsUsedForThisCheck) yields the amount of pages checkable per compute unit
-    pagesPerComputeUnit: number;
+    pagesPerComputeUnit?: number;
 
     // URLs
     url: string;
@@ -100,7 +100,7 @@ export interface ActorCheckDetailedOutput {
     timedOut: UrlCheckResult[];
     failedToLoadOther: UrlCheckResult[];
     accessDenied: UrlCheckResult[];
-    successfulAccess: UrlCheckResult[];
+    success: UrlCheckResult[];
 
     // Status codes
     statusCodes: Record<number, UrlCheckResult[]>;

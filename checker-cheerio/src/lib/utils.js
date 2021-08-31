@@ -1,8 +1,6 @@
-// TODO: move these to the actors that run the checking themselves
-
 /**
- * @param {import('./types').ActorCheckDetailedOutput} data
- * @return {import('./types').ActorCheckSimplifiedOutput}
+ * @param {import('../../../common/types').ActorCheckDetailedOutput} data
+ * @return {import('../../../common/types').ActorCheckSimplifiedOutput}
  */
 export function convertDetailedOutputToSimplified(data) {
     /** @type {Record<string, any>} */
