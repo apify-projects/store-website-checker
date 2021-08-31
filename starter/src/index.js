@@ -5,6 +5,7 @@ import { revivePendingConfigs } from './lib/revivePendingConfigs.js';
 import { waitForRunToFinish, startRun } from './lib/startRunAndPool.js';
 
 const { log, sleep } = Apify.utils;
+const env = Apify.getEnv();
 
 Apify.main(async () => {
     /** @type {import('../../common/types').ActorInputData} */
@@ -13,7 +14,7 @@ Apify.main(async () => {
 
     // Log the input
     log.info('Input provided:');
-    console.dir(input);
+    log.debug(inspect(input, false, 4));
 
     /** @type {import('./types').FrontendActorState} */
     // @ts-expect-error It's an object
@@ -75,4 +76,8 @@ Apify.main(async () => {
         // Await all runs to finish before continuing
         await Promise.allSettled(promises);
     }
+
+    log.info(`Checking ${state.totalUrls} URLs completed!`);
+    log.info(`Please go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=html to see the results`);
+    log.info(`Go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=json for the JSON output`);
 });
