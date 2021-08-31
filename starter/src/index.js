@@ -79,6 +79,10 @@ Apify.main(async () => {
         await Promise.allSettled(promises);
     }
 
+    // Save the state as done, to prevent resurrection doing requests it doesn't have to do
+    state.preparedConfigs = [];
+    await Apify.setValue('STATE', state);
+
     log.info(`Checking ${state.totalUrls} URLs completed!`);
     log.info(`Please go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=html to see the results`);
     log.info(`Go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=json for the JSON output`);
