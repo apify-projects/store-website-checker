@@ -1,5 +1,5 @@
 import { getEnv, PseudoUrl, pushData, setValue, utils } from 'apify';
-import { testHtml } from './checkers';
+import { testHtml } from './checkers.js';
 
 /**
  * @param {import('../types').CheerioActorInput} input

@@ -1,5 +1,5 @@
 import Apify from 'apify';
-import { startRun, waitForRunToFinish } from './startRunAndPool';
+import { startRun, waitForRunToFinish } from './startRunAndPool.js';
 
 const { log, sleep } = Apify.utils;
 

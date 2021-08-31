@@ -1,7 +1,7 @@
 import Apify from 'apify';
-import { convertInputToActorConfigs } from './lib/configs';
-import { revivePendingConfigs } from './lib/revivePendingConfigs';
-import { waitForRunToFinish, startRun } from './lib/startRunAndPool';
+import { convertInputToActorConfigs } from './lib/configs.js';
+import { revivePendingConfigs } from './lib/revivePendingConfigs.js';
+import { waitForRunToFinish, startRun } from './lib/startRunAndPool.js';
 
 const { log, sleep } = Apify.utils;
 

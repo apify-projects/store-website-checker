@@ -1,7 +1,7 @@
 import Apify from 'apify';
-import { handleFailedRequest } from './lib/handleFailedRequest';
-import { handlePage } from './lib/handlePage';
-import { convertDetailedOutputToSimplified } from './lib/utils';
+import { handleFailedRequest } from './lib/handleFailedRequest.js';
+import { handlePage } from './lib/handlePage.js';
+import { convertDetailedOutputToSimplified } from './lib/utils.js';
 
 const { log } = Apify.utils;
 const env = Apify.getEnv();
