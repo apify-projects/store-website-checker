@@ -1,4 +1,5 @@
 import Apify from 'apify';
+import { inspect } from 'util';
 import { convertInputToActorConfigs } from './lib/configs.js';
 import { revivePendingConfigs } from './lib/revivePendingConfigs.js';
 import { waitForRunToFinish, startRun } from './lib/startRunAndPool.js';
@@ -29,7 +30,8 @@ Apify.main(async () => {
     setInterval(async () => {
         await Apify.setValue('STATE', state);
 
-        console.dir(state, { depth: 3 });
+        log.debug('Internal state:');
+        log.debug(inspect(state, false, 3));
     }, 10_000);
 
     state.preparedConfigs = convertInputToActorConfigs(input);

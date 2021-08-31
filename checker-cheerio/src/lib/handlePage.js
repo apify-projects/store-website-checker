@@ -60,7 +60,10 @@ export async function handlePage(input, requestQueue, state, { request, $, body,
             pseudoUrls: input.pseudoUrls.map(
                 (req) => new PseudoUrl(req.purl, {
                     url: request.url,
-                    ...req,
+                    headers: req.headers,
+                    method: req.method,
+                    payload: req.payload,
+                    userData: req.userData,
                 }),
             ),
             requestQueue,
