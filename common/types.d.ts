@@ -56,6 +56,9 @@ export interface ActorInputData {
     'playwright.chrome'?: boolean;
     'playwright.firefox'?: boolean;
     'playwright.webkit'?: boolean;
+    'playwright.headfull'?: boolean;
+    'playwright.useChrome'?: boolean;
+    'playwright.waitFor'?: string;
 }
 
 export interface PreparedActorConfig {

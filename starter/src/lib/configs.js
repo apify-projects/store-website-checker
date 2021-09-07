@@ -89,6 +89,9 @@ function createActorRunConfigForCrawler({ configs, input, urlData, checkerId, pl
             config.input['puppeteer.waitFor'] = input['puppeteer.waitFor'];
         } else if (checkerId === ACTOR_PLAYWRIGHT_CHECKER_NAME && playwrightBrowser) {
             config.input[`playwright.${playwrightBrowser}`] = input[`playwright.${playwrightBrowser}`];
+            config.input['playwright.headfull'] = input[`playwright.headfull`];
+            config.input['playwright.useChrome'] = input['playwright.useChrome'];
+            config.input['playwright.waitFor'] = input['playwright.waitFor'];
         }
 
         configs.push(config);

@@ -27,28 +27,6 @@
         "useApifyProxy": false
       }
     },
-    "checkers.cheerio": {
-      "title": "Cheerio",
-      "type": "boolean",
-      "description": "Crawl with Cheerio",
-      "default": true,
-      "editor": "checkbox",
-      "groupCaption": "Crawlers to use",
-      "groupDescription": "Select which crawler types should be used for checking these domains"
-    },
-    "checkers.puppeteer": {
-      "title": "Puppeteer",
-      "type": "boolean",
-      "description": "Crawl with Puppeteer",
-      "default": true,
-      "editor": "checkbox"
-    },
-    "checkers.playwright": {
-      "title": "Playwright",
-      "type": "boolean",
-      "description": "Crawl with Playwright",
-      "editor": "checkbox"
-    },
     "saveSnapshot": {
       "title": "Enabled",
       "type": "boolean",
@@ -115,26 +93,6 @@
       "default": 10,
       "editor": "number",
       "minimum": 1
-    },
-    "puppeteer.headfull": {
-      "title": "Headfull browser (XVFB)",
-      "type": "boolean",
-      "description": "Only works for Puppeteer type!",
-      "sectionCaption": "Puppeteer Options",
-      "sectionDescription": "Options that are passed in to puppeteer when checking",
-      "editor": "checkbox"
-    },
-    "puppeteer.useChrome": {
-      "title": "Use Chrome",
-      "type": "boolean",
-      "description": "Only works for Puppeteer type! Be careful that Chrome is not guaranteed to work with Puppeteer.",
-      "editor": "checkbox"
-    },
-    "puppeteer.waitFor": {
-      "title": "Wait for",
-      "type": "string",
-      "description": "Only works for Puppeteer type. Will wait on each page. You can provide number in ms or a selector.",
-      "editor": "textfield"
     },
     "playwright.chrome": {
       "title": "Chrome",
