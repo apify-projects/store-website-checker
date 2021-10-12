@@ -20,7 +20,7 @@ export async function handlePage(input, requestQueue, state, { request, $, body,
     state.totalPages.push({ url: request.url, htmlUrl });
 
     /** @type {{ statusCode: number; }} */
-    // @ts-expect-errorJS style casts
+    // @ts-expect-error JS style casts
     const { statusCode } = response;
 
     state.statusCodes[statusCode] ??= [];
