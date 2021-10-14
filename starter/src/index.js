@@ -12,6 +12,8 @@ Apify.main(async () => {
     // @ts-ignore It's not null
     const input = await Apify.getInput();
 
+    const { maxConcurrentDomainsChecked, urlsToCheck } = input;
+
     // Log the input
     log.info('Input provided:');
     log.debug(inspect(input, false, 4));
@@ -36,14 +38,12 @@ Apify.main(async () => {
     }, 10_000);
 
     state.preparedConfigs = convertInputToActorConfigs(input);
-    state.totalUrls = input.urlsToCheck.length;
+    state.totalUrls = urlsToCheck.length;
 
     log.info(`Preparing to process ${state.totalUrls} URLs...\n`);
 
     // Check for revivals first, in the event the actor crashed, and handle those to the end
     await revivePendingConfigs(state);
-
-    const { maxConcurrentDomainsChecked } = input;
 
     while (true) {
         // Each element of domainsToCheck represents a URL with its own run configurations
