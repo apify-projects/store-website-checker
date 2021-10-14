@@ -76,7 +76,6 @@ export interface PreparedActorConfig {
 
 export interface CreateActorRunConfig {
     checkerId: string;
-    configs: PreparedActorConfig[];
     input: ActorInputData;
     urlData: UrlInput;
     playwrightBrowser?: 'chrome' | 'firefox' | 'webkit';
