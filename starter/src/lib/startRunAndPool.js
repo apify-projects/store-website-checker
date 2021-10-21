@@ -1,4 +1,6 @@
-import { newClient, pushData } from 'apify';
+import Apify from 'apify';
+
+const { newClient, pushData } = Apify;
 
 /** @type {import('apify-client').ApifyClient} */
 const client = newClient();

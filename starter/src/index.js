@@ -3,7 +3,7 @@ import { inspect } from 'util';
 import { convertInputToActorConfigs } from './lib/configs.js';
 import { waitForRunToFinishAndPushData, startRun } from './lib/startRunAndPool.js';
 
-const { log, sleep } = Apify.utils;
+const { log } = Apify.utils;
 const env = Apify.getEnv();
 
 Apify.main(async () => {
