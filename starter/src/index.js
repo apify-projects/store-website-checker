@@ -66,7 +66,7 @@ Apify.main(async () => {
         maxConcurrency: maxConcurrentDomainsChecked,
         requestList,
         handleRequestFunction: async ({ request }) => {
-            const { uniqueKey, userData } = request;
+            const { userData } = request;
             /** @type {{ actorInput: import('../../common/types').PreparedActorConfig }} */
             // @ts-expect-error JS-style casting
             const { actorInput } = userData;
@@ -83,13 +83,16 @@ Apify.main(async () => {
                 );
                 log.info(`You can monitor the status of the run by going to https://console.apify.com/actors/runs/${result.id}`);
                 actorInput.runId = result.id;
-                // TODO(vladfrangu): remove this once I confirm the value is updated, so we don't restart runs for no reason
-                console.log(state.runConfigurations[Number(uniqueKey)]);
+
+                // Save the state now
+                // TODO(vladfrangu): ask Lukas if this is needed
+                await Apify.setValue('STATE', state);
             }
 
             // Wait for the run to finish
             await waitForRunToFinishAndPushData(actorInput);
         },
+        handleRequestTimeoutSecs: Number.MAX_SAFE_INTEGER,
     });
 
     // Run the checker
