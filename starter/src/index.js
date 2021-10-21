@@ -92,7 +92,7 @@ Apify.main(async () => {
             // Wait for the run to finish
             await waitForRunToFinishAndPushData(actorInput);
         },
-        handleRequestTimeoutSecs: Number.MAX_SAFE_INTEGER,
+        handleRequestTimeoutSecs: 2_147_483_647,
     });
 
     // Run the checker
