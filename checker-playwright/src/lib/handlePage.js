@@ -81,20 +81,25 @@ export async function handlePage(input, requestQueue, state, { request, response
     });
 
     if (input.linkSelector) {
-        await utils.enqueueLinks({
-            $,
-            selector: input.linkSelector,
-            pseudoUrls: input.pseudoUrls.map(
-                (req) => new PseudoUrl(req.purl, {
-                    url: request.url,
-                    headers: req.headers,
-                    method: req.method,
-                    payload: req.payload,
-                    userData: req.userData,
-                }),
-            ),
-            requestQueue,
-            baseUrl: request.loadedUrl,
-        });
+        const info = await requestQueue.getInfo();
+
+        // Only queue up more requests in the queue if we should (this should avoid excessive queue writes)
+        if (input.maxNumberOfPagesCheckedPerDomain > info.totalRequestCount) {
+            await utils.enqueueLinks({
+                $,
+                selector: input.linkSelector,
+                pseudoUrls: input.pseudoUrls.map(
+                    (req) => new PseudoUrl(req.purl, {
+                        url: request.url,
+                        headers: req.headers,
+                        method: req.method,
+                        payload: req.payload,
+                        userData: req.userData,
+                    }),
+                ),
+                requestQueue,
+                baseUrl: request.loadedUrl,
+            });
+        }
     }
 }
