@@ -1,5 +1,6 @@
-import { utils } from 'apify';
+import Apify from 'apify';
 
+const { utils } = Apify;
 const { log } = utils;
 
 /**

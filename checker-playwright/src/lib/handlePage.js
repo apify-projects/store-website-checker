@@ -1,6 +1,8 @@
-import { getEnv, PseudoUrl, pushData, setValue, utils } from 'apify';
+import Apify from 'apify';
 import Cheerio from 'cheerio';
 import { testHtml } from './checkers.js';
+
+const { getEnv, PseudoUrl, pushData, setValue, utils } = Apify;
 
 /**
  * @param {import('../types').PlaywrightActorInput} input
