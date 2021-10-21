@@ -10,6 +10,6 @@
   "author": "Vlad Frangu <kingdgrizzle@gmail.com>",
   "private": true,
   "dependencies": {
-    "apify": "^2.0.6"
+    "apify": "^2.1.0"
   }
 }
