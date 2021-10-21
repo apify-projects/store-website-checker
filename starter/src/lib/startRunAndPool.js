@@ -14,10 +14,9 @@ export async function startRun(run) {
 
 /**
  * @param {import('../../../common/types').PreparedActorConfig} runConfig
- * @param {string} runId
  */
-export async function waitForRunToFinish(runConfig, runId) {
-    const run = client.run(runId);
+export async function waitForRunToFinishAndPushData(runConfig) {
+    const run = client.run(runConfig.runId);
 
     const finishedRun = await run.waitForFinish();
     const { computeUnits } = finishedRun.stats;

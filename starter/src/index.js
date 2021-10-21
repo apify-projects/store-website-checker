@@ -1,8 +1,7 @@
 import Apify from 'apify';
 import { inspect } from 'util';
 import { convertInputToActorConfigs } from './lib/configs.js';
-import { revivePendingConfigs } from './lib/revivePendingConfigs.js';
-import { waitForRunToFinish, startRun } from './lib/startRunAndPool.js';
+import { waitForRunToFinishAndPushData, startRun } from './lib/startRunAndPool.js';
 
 const { log, sleep } = Apify.utils;
 const env = Apify.getEnv();
@@ -11,6 +10,8 @@ Apify.main(async () => {
     /** @type {import('../../common/types').ActorInputData} */
     // @ts-ignore It's not null
     const input = await Apify.getInput();
+    log.debug('Provided inputs:');
+    log.debug(inspect(input));
 
     const { maxConcurrentDomainsChecked, urlsToCheck } = input;
 
@@ -21,12 +22,16 @@ Apify.main(async () => {
     /** @type {import('./types').FrontendActorState} */
     // @ts-expect-error It's an object
     const state = await Apify.getValue('STATE') ?? {
-        preparedConfigs: [],
-        pendingConfigs: [],
-        totalUrls: 0,
+        runConfigurations: [],
+        totalUrls: urlsToCheck.length,
+        checkerFinished: false,
     };
 
     Apify.events.on('migrating', async () => {
+        await Apify.setValue('STATE', state);
+    });
+
+    Apify.events.on('persistState', async () => {
         await Apify.setValue('STATE', state);
     });
 
@@ -37,54 +42,62 @@ Apify.main(async () => {
         log.debug(inspect(state, false, 3));
     }, 10_000);
 
-    state.preparedConfigs = convertInputToActorConfigs(input);
-    state.totalUrls = urlsToCheck.length;
+    // If we haven't initialized the state yet, do it now
+    if (state.runConfigurations.length === 0 && !state.checkerFinished) {
+        state.runConfigurations = convertInputToActorConfigs(input);
+    }
+
+    // Sort state based on started runs
+    state.runConfigurations = state.runConfigurations.sort((_, b) => Number(Boolean(b.runId)));
+    await Apify.setValue('STATE', state);
 
     log.info(`Preparing to process ${state.totalUrls} URLs...\n`);
 
-    // Check for revivals first, in the event the actor crashed, and handle those to the end
-    await revivePendingConfigs(state);
+    /** @type {import('apify').RequestOptions[]} */
+    const sources = state.runConfigurations.map((actorInput, index) => ({
+        url: 'https://localhost',
+        uniqueKey: index.toString(),
+        userData: { actorInput },
+    }));
 
-    while (true) {
-        // Each element of domainsToCheck represents a URL with its own run configurations
-        const domainsToCheck = state.preparedConfigs.splice(0, maxConcurrentDomainsChecked);
-        // If we got no more URLs to run, exit the loop
-        if (domainsToCheck.length === 0) break;
+    const requestList = await Apify.openRequestList(null, sources);
 
-        log.info(`Starting a batch of ${domainsToCheck.length} URLs to check`);
+    const runner = new Apify.BasicCrawler({
+        maxConcurrency: maxConcurrentDomainsChecked,
+        requestList,
+        handleRequestFunction: async ({ request }) => {
+            const { uniqueKey, userData } = request;
+            /** @type {{ actorInput: import('../../common/types').PreparedActorConfig }} */
+            // @ts-expect-error JS-style casting
+            const { actorInput } = userData;
 
-        state.pendingConfigs = domainsToCheck;
-        // Save the state right off the bat, in the event the actor dies right after
-        await Apify.setValue('STATE', state);
-
-        const promises = [];
-
-        for (const domainRunConfigs of domainsToCheck) {
-            for (const run of domainRunConfigs) {
-                const result = await startRun(run);
+            if (actorInput.runId) {
+                log.info(`Found run ${actorInput.runId} with actor ${actorInput.actorId} for URL "${actorInput.url}" - waiting for it to finish.`);
+                log.info(`You can monitor the status of the run by going to https://console.apify.com/actors/runs/${actorInput.runId}`);
+            } else {
+                const result = await startRun(actorInput);
                 log.info(
-                    `Starting run for "${run.url}" with actor ${run.actorId} and ${
-                        run.input.proxyConfiguration.useApifyProxy ? `proxy ${run.proxyUsed ?? 'auto'}` : 'no proxy'
+                    `Starting run for "${actorInput.url}" with actor ${actorInput.actorId} and ${
+                        actorInput.input.proxyConfiguration.useApifyProxy ? `proxy ${actorInput.proxyUsed ?? 'auto'}` : 'no proxy'
                     }.`,
                 );
                 log.info(`You can monitor the status of the run by going to https://console.apify.com/actors/runs/${result.id}`);
-                run.runId = result.id;
-                await Apify.setValue('STATE', state);
-
-                // Start pooling the run for its results
-                promises.push(waitForRunToFinish(run, result.id));
-
-                // Wait a second to not overload the platform
-                await sleep(1000);
+                actorInput.runId = result.id;
+                // TODO(vladfrangu): remove this once I confirm the value is updated, so we don't restart runs for no reason
+                console.log(state.runConfigurations[Number(uniqueKey)]);
             }
-        }
 
-        // Await all runs to finish before continuing
-        await Promise.allSettled(promises);
-    }
+            // Wait for the run to finish
+            await waitForRunToFinishAndPushData(actorInput);
+        },
+    });
+
+    // Run the checker
+    await runner.run();
 
     // Save the state as done, to prevent resurrection doing requests it doesn't have to do
-    state.preparedConfigs = [];
+    state.runConfigurations = [];
+    state.checkerFinished = true;
     await Apify.setValue('STATE', state);
 
     log.info(`\nChecking ${state.totalUrls} URLs completed!`);

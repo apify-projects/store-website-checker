@@ -2,22 +2,20 @@ import { ACTOR_CHEERIO_CHECKER_NAME, ACTOR_PLAYWRIGHT_CHECKER_NAME, ACTOR_PUPPET
 
 /** @param {import('../../../common/types').ActorInputData} input */
 export function convertInputToActorConfigs(input) {
-    /** @type {import('../../../common/types').PreparedActorConfig[][]} */
+    /** @type {import('../../../common/types').PreparedActorConfig[]} */
     const configs = [];
 
     for (const urlData of input.urlsToCheck) {
-        /** @type {import('../../../common/types').PreparedActorConfig[]} */
-        const urlConfigs = [];
         if (input['checkers.cheerio']) {
-            urlConfigs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_CHEERIO_CHECKER_NAME }));
+            configs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_CHEERIO_CHECKER_NAME }));
         }
         if (input['checkers.puppeteer']) {
-            urlConfigs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_PUPPETEER_CHECKER_NAME }));
+            configs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_PUPPETEER_CHECKER_NAME }));
         }
         if (input['checkers.playwright']) {
             // Create a run config for each playwright browser
             if (input['playwright.chrome']) {
-                urlConfigs.push(...createActorRunConfigForCrawler({
+                configs.push(...createActorRunConfigForCrawler({
                     input,
                     urlData,
                     checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
@@ -25,7 +23,7 @@ export function convertInputToActorConfigs(input) {
                 }));
             }
             if (input['playwright.firefox']) {
-                urlConfigs.push(...createActorRunConfigForCrawler({
+                configs.push(...createActorRunConfigForCrawler({
                     input,
                     urlData,
                     checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
@@ -33,7 +31,7 @@ export function convertInputToActorConfigs(input) {
                 }));
             }
             if (input['playwright.webkit']) {
-                urlConfigs.push(...createActorRunConfigForCrawler({
+                configs.push(...createActorRunConfigForCrawler({
                     input,
                     urlData,
                     checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
@@ -41,8 +39,6 @@ export function convertInputToActorConfigs(input) {
                 }));
             }
         }
-
-        configs.push(urlConfigs);
     }
 
     return configs;
@@ -91,6 +87,6 @@ function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwright
             config.input['playwright.waitFor'] = input['playwright.waitFor'];
         }
 
-        yield (config);
+        yield config;
     }
 }
