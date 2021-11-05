@@ -1,0 +1,14 @@
+{
+  "extends": ["@apify/ts"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json",
+    "sourceType": "module",
+    "ecmaVersion": 2020
+  },
+  "env": {
+    "es6": true,
+		"es2017": true,
+		"es2020": true
+  }
+}
