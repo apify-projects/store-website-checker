@@ -27,20 +27,9 @@ Apify.main(async () => {
         checkerFinished: false,
     };
 
-    Apify.events.on('migrating', async () => {
-        await Apify.setValue('STATE', state);
-    });
-
     Apify.events.on('persistState', async () => {
         await Apify.setValue('STATE', state);
     });
-
-    setInterval(async () => {
-        await Apify.setValue('STATE', state);
-
-        log.debug('Internal state:');
-        log.debug(inspect(state, false, 3));
-    }, 10_000);
 
     // If we haven't initialized the state yet, do it now
     if (state.runConfigurations.length === 0 && !state.checkerFinished) {
@@ -83,16 +72,12 @@ Apify.main(async () => {
                 );
                 log.info(`You can monitor the status of the run by going to https://console.apify.com/actors/runs/${result.id}`);
                 actorInput.runId = result.id;
-
-                // Save the state now
-                // TODO(vladfrangu): ask Lukas if this is needed
-                await Apify.setValue('STATE', state);
             }
 
             // Wait for the run to finish
             await waitForRunToFinishAndPushData(actorInput);
         },
-        handleRequestTimeoutSecs: 2_147_483_647,
+        handleRequestTimeoutSecs: 2_147_483,
     });
 
     // Run the checker
