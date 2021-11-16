@@ -1,6 +1,6 @@
 {
   "title": "Web Checker",
-  "description": "The web checker actor loads <b>URLs to check</b> and checks for common captchas, status codes returned from crawling, as well as calculates the price a user may pay. <b>TODO: Needs to be more descriptive!!</b>",
+  "description": "The web checker actor loads <b>URLs to check</b> and checks for common captchas, status codes returned from crawling, as well as calculates the price a user may pay.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
