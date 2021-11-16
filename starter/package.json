@@ -1,0 +1,15 @@
+{
+  "name": "website-checker-starter",
+  "version": "1.0.0",
+  "description": "This actor is responsible for starting the checker actors and reporting back all data found by them.",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js"
+  },
+  "author": "Vlad Frangu <kingdgrizzle@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "apify": "^2.1.0"
+  }
+}
