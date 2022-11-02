@@ -1,33 +1,22 @@
-import Apify from 'apify';
+import { Actor } from 'apify';
 
-const { newClient, pushData } = Apify;
+import type { PreparedActorConfig, ActorCheckSimplifiedOutput } from './typedefs.js';
 
-/** @type {import('apify-client').ApifyClient} */
-const client = newClient();
-
-/**
- * @param {import('../../../common/types').PreparedActorConfig} run
- */
-export async function startRun(run) {
+export async function startRun(run: PreparedActorConfig) {
+    const client = Actor.newClient();
     const result = await client.actor(run.actorId).start(run.input, run.params);
 
     return result;
 }
 
-/**
- * @param {import('../../../common/types').PreparedActorConfig} runConfig
- */
-export async function waitForRunToFinishAndPushData(runConfig) {
-    const run = client.run(runConfig.runId);
+export async function waitForRunToFinishAndPushData(runConfig: PreparedActorConfig) {
+    const client = Actor.newClient();
+    const run = client.run(runConfig.runId!);
 
     const finishedRun = await run.waitForFinish();
     const { computeUnits } = finishedRun.stats;
 
-    const output = await run.keyValueStore().getRecord('OUTPUT');
-
-    /** @type {{ value: import('../../../common/types').ActorCheckSimplifiedOutput }} */
-    // @ts-expect-error Casting to known type
-    const { value } = output;
+    const value = (await run.keyValueStore().getRecord('OUTPUT'))!.value as ActorCheckSimplifiedOutput;
 
     value.computeUnitsUsedForThisCheck = Number(computeUnits.toFixed(4));
     value.pagesPerComputeUnit = Number((value.totalPages / computeUnits).toFixed(2));
@@ -41,5 +30,5 @@ export async function waitForRunToFinishAndPushData(runConfig) {
         value.playwrightBrowser = 'webkit';
     }
 
-    await pushData(value);
+    await Actor.pushData(value);
 }

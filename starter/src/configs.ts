@@ -1,9 +1,8 @@
 import { ACTOR_CHEERIO_CHECKER_NAME, ACTOR_PLAYWRIGHT_CHECKER_NAME, ACTOR_PUPPETEER_CHECKER_NAME } from './constants.js';
+import type { PreparedActorConfig, ActorInputData, CreateActorRunConfig } from './typedefs.js';
 
-/** @param {import('../../../common/types').ActorInputData} input */
-export function convertInputToActorConfigs(input) {
-    /** @type {import('../../../common/types').PreparedActorConfig[]} */
-    const configs = [];
+export function convertInputToActorConfigs(input: ActorInputData) {
+    const configs: PreparedActorConfig[] = [];
 
     for (const urlData of input.urlsToCheck) {
         if (input['checkers.cheerio']) {
@@ -44,13 +43,9 @@ export function convertInputToActorConfigs(input) {
     return configs;
 }
 
-/**
- * @param {import('../../../common/types').CreateActorRunConfig} args_0
- */
-function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser }) {
+function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser }: CreateActorRunConfig) {
     for (const group of input.proxyConfiguration.apifyProxyGroups ?? ['auto']) {
-        /** @type {import('../../../common/types').PreparedActorConfig} */
-        const config = {
+        const config: PreparedActorConfig = {
             actorId: checkerId,
             proxyUsed: group === 'auto' ? undefined : group,
             url: urlData.url,
