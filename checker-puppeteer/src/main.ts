@@ -1,16 +1,15 @@
-import Apify from 'apify';
+import { Actor } from 'apify';
+import { log, PuppeteerCrawler, RequestOptions } from 'crawlee';
+
+import type { ActorCheckDetailedOutput, PuppeteerActorInput } from './typedefs';
+
 import { inspect } from 'util';
-import { handleFailedRequest } from './lib/handleFailedRequest.js';
-import { handlePage } from './lib/handlePage.js';
-import { convertDetailedOutputToSimplified } from './lib/utils.js';
+import { handleFailedRequest } from './handleFailedRequest.js';
+import { handlePage } from './handlePage.js';
+import { convertDetailedOutputToSimplified } from './utils.js';
 
-const { log } = Apify.utils;
-const env = Apify.getEnv();
-
-Apify.main(async () => {
-    /** @type {import('./types').PuppeteerActorInput} */
-    // @ts-expect-error It's not null
-    const input = await Apify.getInput();
+Actor.main(async () => {
+    const input = await Actor.getInput() as PuppeteerActorInput;
 
     // Log the input
     // Log the input
@@ -18,6 +17,8 @@ Apify.main(async () => {
     log.debug(inspect(input, false, 4));
 
     log.info('Running a Puppeteer Checker.');
+
+    const env = Actor.getEnv();
 
     const {
         maxConcurrentPagesCheckedPerDomain,
@@ -30,24 +31,23 @@ Apify.main(async () => {
         'puppeteer.headfull': headfull,
     } = input;
 
-    const proxy = await Apify.createProxyConfiguration({
+    const proxy = await Actor.createProxyConfiguration({
         groups: proxyConfiguration.apifyProxyGroups,
         countryCode: proxyConfiguration.apifyProxyCountry,
     });
 
-    const requestQueue = await Apify.openRequestQueue();
+    const requestQueue = await Actor.openRequestQueue();
 
     const [urlData] = urlsToCheck;
-    await requestQueue.addRequest({ ...urlData });
+    await requestQueue.addRequest(urlData as RequestOptions);
     for (let _ = 0; _ < (repeatChecksOnProvidedUrls ?? 0); _++) {
         await requestQueue.addRequest({
             ...urlData,
             uniqueKey: Math.random().toString(),
-        });
+        } as RequestOptions);
     }
 
-    /** @type {import('../../common/types').ActorCheckDetailedOutput} */
-    const state = {
+    const state: ActorCheckDetailedOutput = {
         url: urlData.url,
         checkerType: 'puppeteer',
         simplifiedOutput: `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`,
@@ -63,24 +63,21 @@ Apify.main(async () => {
         hCaptcha: [],
     };
 
-    const crawler = new Apify.PuppeteerCrawler({
+    const crawler = new PuppeteerCrawler({
         maxRequestRetries: 0,
         maxRequestsPerCrawl: maxNumberOfPagesCheckedPerDomain,
         maxConcurrency: maxConcurrentPagesCheckedPerDomain,
         requestQueue,
-        handlePageFunction: (pageInputs) => handlePage(input, requestQueue, state, pageInputs),
-        handleFailedRequestFunction: (requestInput) => handleFailedRequest(state, requestInput),
+        requestHandler: (pageInputs) => handlePage(input, requestQueue, state, pageInputs),
+        failedRequestHandler: (requestInput) => handleFailedRequest(state, requestInput),
         proxyConfiguration: proxy,
         useSessionPool: false,
         launchContext: {
-            stealth: true,
             useChrome,
             launchOptions: {
-                // @ts-expect-error Issue in the typings of apify
                 headless: headfull ? undefined : true,
             },
         },
-        // @ts-expect-error Might need to correct the typings for this somewhere (probably in apify)
         browserPoolOptions: {
             retireBrowserAfterPageCount: retireBrowserInstanceAfterRequestCount,
         },
@@ -88,8 +85,9 @@ Apify.main(async () => {
 
     await crawler.run();
 
-    await Apify.setValue('OUTPUT', convertDetailedOutputToSimplified(state));
-    await Apify.setValue('DETAILED-OUTPUT', state);
+    await Actor.setValue('OUTPUT', convertDetailedOutputToSimplified(state));
+    await Actor.setValue('DETAILED-OUTPUT', state);
+
     log.info('Checker finished.');
     log.info(
         `Simplified output: https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`,

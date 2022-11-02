@@ -1,7 +1,6 @@
 {
-	"name": "website-checker-puppeteer",
-	"version": "0.0.0",
+	"name": "checker-puppeteer",
+	"version": "0.0",
 	"buildTag": "latest",
-	"env": null,
-	"template": "basic"
+	"env": null
 }
