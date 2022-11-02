@@ -1,7 +1,6 @@
 {
-	"name": "website-checker-starter",
-	"version": "0.0.0",
+	"name": "starter",
+	"version": "0.0",
 	"buildTag": "latest",
-	"env": null,
-	"template": "basic"
+	"env": null
 }
