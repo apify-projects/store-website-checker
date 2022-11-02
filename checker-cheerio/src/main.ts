@@ -79,7 +79,9 @@ Actor.main(async () => {
 
     // TODO: Consider making this an option in the CheerioCrawler instead of needing to override a function
     // We don't want the crawler to throw errors on bad statuses
-    Reflect.set(crawler, '_throwOnBlockedRequest', () => {});
+    Reflect.set(crawler, '_throwOnBlockedRequest', () => {
+        // Do nothing
+    });
 
     await crawler.run();
 

@@ -32,8 +32,8 @@ export async function handlePage(
     if (input.saveSnapshot) {
         const key = `SNAPSHOT-${Math.random().toString()}`;
         await puppeteerUtils.saveSnapshot(page, { key });
-        screenshotUrl = `https://api.apify.com/v2/key-value-stores/${getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`;
-        htmlUrl = `https://api.apify.com/v2/key-value-stores/${getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
+        screenshotUrl = `https://api.apify.com/v2/key-value-stores/${Actor.getEnv().defaultKeyValueStoreId}/records/${key}.jpg?disableRedirect=true`;
+        htmlUrl = `https://api.apify.com/v2/key-value-stores/${Actor.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
     }
 
     state.totalPages.push({ url: request.url, htmlUrl, screenshotUrl });

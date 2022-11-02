@@ -1,6 +1,6 @@
 import { log } from 'crawlee';
 
-import type { CheerioCrawlingContext} from 'crawlee';
+import type { CheerioCrawlingContext } from 'crawlee';
 
 import type { ActorCheckDetailedOutput } from './typedefs.js';
 

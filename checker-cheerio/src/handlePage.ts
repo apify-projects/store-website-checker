@@ -19,7 +19,7 @@ export async function handlePage(
     if (input.saveSnapshot) {
         const key = `SNAPSHOT-${Math.random().toString()}`;
         await Actor.setValue(`${key}.html`, body, { contentType: 'text/html' });
-        htmlUrl = `https://api.apify.com/v2/key-value-stores/${getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
+        htmlUrl = `https://api.apify.com/v2/key-value-stores/${Actor.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
     }
 
     state.totalPages.push({ url: request.url, htmlUrl });
@@ -72,7 +72,6 @@ export async function handlePage(
                         userData: req.userData,
                     }) as PseudoUrlInput,
                 ),
-                requestQueue,
                 baseUrl: request.loadedUrl,
             });
         }
