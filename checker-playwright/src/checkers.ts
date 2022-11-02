@@ -1,37 +1,24 @@
-/**
- * @param {import('../../../common/types').Cheerio$} $
- */
-export function distilCaptcha($) {
+import type { CheerioAPI } from 'cheerio';
+
+export function distilCaptcha($: CheerioAPI): boolean {
     return $('#distilCaptchaForm').length > 0
         || $('[action*="distil_r_captcha.html"]').length > 0;
 }
 
-/**
- * @param {import('../../../common/types').Cheerio$} $
- */
-export function recaptcha($) {
+export function recaptcha($: CheerioAPI): boolean {
     return $('#recaptcha').length > 0
         || $('iframe[src*="/recaptcha/"]').length > 0;
 }
 
-/**
- * @param {import('../../../common/types').Cheerio$} $
- */
-export function hCaptcha($) {
+export function hCaptcha($: CheerioAPI): boolean {
     return $('[action="/errors/validateCaptcha"]').length > 0;
 }
 
-/**
- * @param {import('../../../common/types').Cheerio$} $
- */
-export function accessDenied($) {
+export function accessDenied($: CheerioAPI): boolean {
     return $('title').text().includes('Access Denied');
 }
 
-/**
- * @param {import('../../../common/types').Cheerio$} $
- */
-export function testHtml($) {
+export function testHtml($: CheerioAPI) {
     return {
         accessDenied: accessDenied($),
         distilCaptcha: distilCaptcha($),

@@ -1,13 +1,10 @@
-import Apify from 'apify';
+import { log } from 'crawlee';
 
-const { utils } = Apify;
-const { log } = utils;
+import type { PlaywrightCrawlingContext } from 'crawlee';
 
-/**
- * @param {import('../../../common/types').ActorCheckDetailedOutput} state
- * @param {import('apify').HandleFailedRequestInput} param1
- */
-export async function handleFailedRequest(state, { request }) {
+import type { ActorCheckDetailedOutput } from './typedefs.js';
+
+export async function handleFailedRequest(state: ActorCheckDetailedOutput, { request }: PlaywrightCrawlingContext) {
     state.totalPages.push({ url: request.url });
 
     const [error] = request.errorMessages;

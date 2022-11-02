@@ -1,20 +1,19 @@
-import Apify from 'apify';
+import { Actor } from 'apify';
+import { log, PlaywrightCrawler, RequestOptions } from 'crawlee';
 import { chromium, firefox, webkit } from 'playwright';
 import { inspect } from 'util';
-import { handleFailedRequest } from './lib/handleFailedRequest.js';
-import { handlePage } from './lib/handlePage.js';
-import { convertDetailedOutputToSimplified } from './lib/utils.js';
 
-const { log } = Apify.utils;
-const env = Apify.getEnv();
+import type { ActorCheckDetailedOutput, PlaywrightActorInput } from './typedefs';
 
-Apify.main(async () => {
-    /** @type {import('./types').PlaywrightActorInput} */
-    // @ts-expect-error It's not null
-    const input = await Apify.getInput();
+import { handleFailedRequest } from './handleFailedRequest.js';
+import { handlePage } from './handlePage.js';
+import { convertDetailedOutputToSimplified } from './utils.js';
 
-    // Log the input
-    // Log the input
+const env = Actor.getEnv();
+
+Actor.main(async () => {
+    const input = await Actor.getInput() as PlaywrightActorInput;
+
     log.info('Input provided:');
     log.debug(inspect(input, false, 4));
 
@@ -44,24 +43,23 @@ Apify.main(async () => {
         launcher = webkit;
     }
 
-    const proxy = await Apify.createProxyConfiguration({
+    const proxy = await Actor.createProxyConfiguration({
         groups: proxyConfiguration.apifyProxyGroups,
         countryCode: proxyConfiguration.apifyProxyCountry,
     });
 
-    const requestQueue = await Apify.openRequestQueue();
+    const requestQueue = await Actor.openRequestQueue();
 
     const [urlData] = urlsToCheck;
-    await requestQueue.addRequest({ ...urlData });
+    await requestQueue.addRequest(urlData as RequestOptions);
     for (let _ = 0; _ < (repeatChecksOnProvidedUrls ?? 0); _++) {
         await requestQueue.addRequest({
             ...urlData,
             uniqueKey: Math.random().toString(),
-        });
+        } as RequestOptions);
     }
 
-    /** @type {import('../../common/types').ActorCheckDetailedOutput} */
-    const state = {
+    const state: ActorCheckDetailedOutput = {
         url: urlData.url,
         checkerType: 'playwright',
         simplifiedOutput: `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`,
@@ -77,13 +75,13 @@ Apify.main(async () => {
         hCaptcha: [],
     };
 
-    const crawler = new Apify.PlaywrightCrawler({
+    const crawler = new PlaywrightCrawler({
         maxRequestRetries: 0,
         maxRequestsPerCrawl: maxNumberOfPagesCheckedPerDomain,
         maxConcurrency: maxConcurrentPagesCheckedPerDomain,
         requestQueue,
-        handlePageFunction: (pageInputs) => handlePage(input, requestQueue, state, pageInputs),
-        handleFailedRequestFunction: (requestInput) => handleFailedRequest(state, requestInput),
+        requestHandler: (pageInputs) => handlePage(input, requestQueue, state, pageInputs),
+        failedRequestHandler: (requestInput) => handleFailedRequest(state, requestInput),
         proxyConfiguration: proxy,
         useSessionPool: false,
         launchContext: {
@@ -93,7 +91,6 @@ Apify.main(async () => {
             },
             launcher,
         },
-        // @ts-expect-error Might need to correct the typings for this somewhere (probably in apify)
         browserPoolOptions: {
             retireBrowserAfterPageCount: retireBrowserInstanceAfterRequestCount,
         },
@@ -101,8 +98,8 @@ Apify.main(async () => {
 
     await crawler.run();
 
-    await Apify.setValue('OUTPUT', convertDetailedOutputToSimplified(state));
-    await Apify.setValue('DETAILED-OUTPUT', state);
+    await Actor.setValue('OUTPUT', convertDetailedOutputToSimplified(state));
+    await Actor.setValue('DETAILED-OUTPUT', state);
     log.info('Checker finished.');
     log.info(
         `Simplified output: https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/OUTPUT?disableRedirect=true`,
