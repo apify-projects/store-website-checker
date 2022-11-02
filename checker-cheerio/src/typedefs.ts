@@ -1,9 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import cheerio from 'cheerio';
+import type { CheerioCrawlingContext } from 'crawlee';
 
-export type Cheerio$ = cheerio.Root;
+type KeysNotRequired =
+    | 'checkers.cheerio'
+    | 'checkers.puppeteer'
+    | 'checkers.playwright'
+    | 'puppeteer.headfull'
+    | 'puppeteer.useChrome'
+    | 'puppeteer.waitFor'
+    | 'playwright.chrome'
+    | 'playwright.firefox'
+    | 'playwright.webkit'
+    | 'maxConcurrentDomainsChecked';
 
-export interface PseudoUrlInput {
+export type CheerioActorInput = Omit<ActorInputData, KeysNotRequired>;
+
+export type CheerioCheckerHandlePageInputs = CheerioCrawlingContext
+
+export interface PseudoUrlInputCustom {
     purl: string;
     method?: string;
     payload?: string;
@@ -40,7 +53,7 @@ export interface ActorInputData {
     urlsToCheck: UrlInput[];
     proxyConfiguration: ProxyConfiguration;
     linkSelector?: string;
-    pseudoUrls: PseudoUrlInput[];
+    pseudoUrls: PseudoUrlInputCustom[];
     repeatChecksOnProvidedUrls?: number;
     maxNumberOfPagesCheckedPerDomain: number;
     maxConcurrentPagesCheckedPerDomain: number;
@@ -121,7 +134,7 @@ export interface UrlCheckResult {
 
 export type ActorCheckSimplifiedOutput = {
     [K in keyof ActorCheckDetailedOutput]:
-        ActorCheckDetailedOutput[K] extends Array<infer _U>
+        ActorCheckDetailedOutput[K] extends Array<any>
             ? number
             : ActorCheckDetailedOutput[K] extends { [key: number]: UrlCheckResult[] }
                 ? Record<number, number>

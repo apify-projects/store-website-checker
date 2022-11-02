@@ -1,7 +1,6 @@
 {
-	"name": "website-checker-cheerio",
-	"version": "0.0.0",
+	"name": "checker-cheerio",
+	"version": "0.0",
 	"buildTag": "latest",
-	"env": null,
-	"template": "basic"
+	"env": null
 }
