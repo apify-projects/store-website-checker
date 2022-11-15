@@ -11,14 +11,18 @@ export async function handlePage(
     input: CheerioActorInput,
     requestQueue: RequestQueue,
     state: ActorCheckDetailedOutput,
-    { request, $, body, response, enqueueLinks }: CheerioCheckerHandlePageInputs,
+    { request, $, body, response, enqueueLinks, json }: CheerioCheckerHandlePageInputs,
 ) {
     /** @type {string | undefined} */
     let htmlUrl;
 
     if (input.saveSnapshot) {
         const key = `SNAPSHOT-${Math.random().toString()}`;
-        await Actor.setValue(`${key}.html`, body, { contentType: 'text/html' });
+        if (json) {
+            await Actor.setValue(key, json);
+        } else {
+            await Actor.setValue(`${key}.html`, body, { contentType: 'text/html' });
+        }
         htmlUrl = `https://api.apify.com/v2/key-value-stores/${Actor.getEnv().defaultKeyValueStoreId}/records/${key}.html?disableRedirect=true`;
     }
 
@@ -30,15 +34,18 @@ export async function handlePage(
     state.statusCodes[statusCode!].push({ url: request.url, htmlUrl });
 
     const captchas: string[] = [];
-    const testResult = testHtml($);
+    // We don't have $ for JSON responses nor we can recognize captchas from it
+    if ($) {
+        const testResult = testHtml($);
 
-    for (const testResultEntry of Object.entries(testResult)) {
-        const wasFound = testResultEntry[1];
-        const testCase = testResultEntry[0] as 'accessDenied' | 'distilCaptcha' | 'recaptcha' | 'hCaptcha';
-        if (wasFound) {
-            captchas.push(testCase);
+        for (const testResultEntry of Object.entries(testResult)) {
+            const wasFound = testResultEntry[1];
+            const testCase = testResultEntry[0] as 'accessDenied' | 'distilCaptcha' | 'recaptcha' | 'hCaptcha';
+            if (wasFound) {
+                captchas.push(testCase);
 
-            state[testCase].push({ url: request.url, htmlUrl });
+                state[testCase].push({ url: request.url, htmlUrl });
+            }
         }
     }
 
@@ -59,7 +66,7 @@ export async function handlePage(
         const info = await requestQueue.getInfo();
 
         // Only queue up more requests in the queue if we should (this should avoid excessive queue writes)
-        if (input.maxNumberOfPagesCheckedPerDomain > info!.totalRequestCount) {
+        if (input.maxNumberOfPagesCheckedPerDomain > info!.totalRequestCount && !!$) {
             await enqueueLinks({
                 selector: input.linkSelector,
                 pseudoUrls: input.pseudoUrls.map(
