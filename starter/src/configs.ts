@@ -64,6 +64,7 @@ function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwright
                 maxConcurrentPagesCheckedPerDomain: input.maxConcurrentPagesCheckedPerDomain,
                 maxConcurrentDomainsChecked: input.maxConcurrentDomainsChecked,
                 retireBrowserInstanceAfterRequestCount: input.retireBrowserInstanceAfterRequestCount,
+                navigationTimeoutSecs: input.navigationTimeoutSecs,
             },
             params: {
                 memory: checkerId === ACTOR_CHEERIO_CHECKER_NAME ? 4096 : 8192,

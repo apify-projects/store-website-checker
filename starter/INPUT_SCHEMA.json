@@ -116,6 +116,13 @@
       "editor": "number",
       "minimum": 1
     },
+    "navigationTimeoutSecs": {
+        "title": "Navigation timeout (seconds)",
+        "type": "integer",
+        "description": "Specifies the maximum time in seconds the request will wait for the page to load. If the page is not loaded within this time, the browser will throw an error and the page will be marked as failed.",
+        "default": 60,
+        "minimum": 1
+    },
     "puppeteer.headfull": {
       "title": "Headfull browser (XVFB)",
       "type": "boolean",

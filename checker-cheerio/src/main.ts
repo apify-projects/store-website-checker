@@ -29,6 +29,7 @@ Actor.main(async () => {
         proxyConfiguration,
         urlsToCheck,
         repeatChecksOnProvidedUrls,
+        navigationTimeoutSecs,
     } = input;
 
     const proxy = await Actor.createProxyConfiguration({
@@ -67,6 +68,7 @@ Actor.main(async () => {
 
     const crawler = new CheerioCrawler({
         maxRequestRetries: 0,
+        navigationTimeoutSecs,
         maxRequestsPerCrawl: maxNumberOfPagesCheckedPerDomain,
         maxConcurrency: maxConcurrentPagesCheckedPerDomain,
         requestQueue,

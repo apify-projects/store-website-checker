@@ -59,6 +59,7 @@ export interface ActorInputData {
     maxConcurrentPagesCheckedPerDomain: number;
     maxConcurrentDomainsChecked: number;
     retireBrowserInstanceAfterRequestCount: number;
+    navigationTimeoutSecs: number;
 
     // Pass only to puppeteer
     'puppeteer.headfull'?: boolean;
