@@ -1,7 +1,7 @@
 import { Actor } from 'apify';
 
 import type { RequestQueue } from 'apify';
-import type { PseudoUrlInput } from 'crawlee';
+import { PseudoUrl, RequestOptions } from 'crawlee';
 
 import { testHtml } from './checkers.js';
 
@@ -11,7 +11,7 @@ export async function handlePage(
     input: CheerioActorInput,
     requestQueue: RequestQueue,
     state: ActorCheckDetailedOutput,
-    { request, $, body, response, enqueueLinks, json }: CheerioCheckerHandlePageInputs,
+    { request, $, body, response, crawler, json }: CheerioCheckerHandlePageInputs,
 ) {
     /** @type {string | undefined} */
     let htmlUrl;
@@ -62,25 +62,28 @@ export async function handlePage(
         wasSuccess,
     });
 
-    if (input.linkSelector) {
+    if (input.linkSelector && !!$) {
         const info = await requestQueue.getInfo();
 
-        // Only queue up more requests in the queue if we should (this should avoid excessive queue writes)
-        if (input.maxNumberOfPagesCheckedPerDomain > info!.totalRequestCount && !!$) {
-            await enqueueLinks({
-                selector: input.linkSelector,
-                pseudoUrls: input.pseudoUrls.map(
-                    (req) => ({
-                        purl: req.purl,
-                        url: request.url,
-                        headers: req.headers,
-                        method: req.method,
-                        payload: req.payload,
-                        userData: req.userData,
-                    }) as PseudoUrlInput,
-                ),
-                baseUrl: request.loadedUrl,
+        const maxUrlsToEnqueue = input.maxNumberOfPagesCheckedPerDomain - info!.totalRequestCount;
+        if (maxUrlsToEnqueue > 0) {
+            const toEnqueue: RequestOptions[] = [];
+            $(input.linkSelector).each((_, el) => {
+                const href = $(el).attr('href');
+                for (const pseudoUrlInput of input.pseudoUrls) {
+                    if (href && new PseudoUrl(pseudoUrlInput.purl).matches(href)) {
+                        const newUrl = new URL(href, request.loadedUrl).toString();
+                        toEnqueue.push({
+                            url: newUrl,
+                            headers: pseudoUrlInput.headers,
+                            method: pseudoUrlInput.method as 'GET' | 'POST',
+                            payload: pseudoUrlInput.payload,
+                            userData: pseudoUrlInput.userData,
+                        });
+                    }
+                }
             });
+            await crawler.addRequests(toEnqueue.slice(0, maxUrlsToEnqueue));
         }
     }
 }
