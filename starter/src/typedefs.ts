@@ -53,6 +53,7 @@ export interface ActorInputData {
     'puppeteer.headfull'?: boolean;
     'puppeteer.useChrome'?: boolean;
     'puppeteer.waitFor'?: string;
+    'puppeteer.memory'?: number;
 
     // Pass only to playwright
     'playwright.chrome'?: boolean;
@@ -61,6 +62,7 @@ export interface ActorInputData {
     'playwright.headfull'?: boolean;
     'playwright.useChrome'?: boolean;
     'playwright.waitFor'?: string;
+    'playwright.memory'?: number;
 }
 
 export interface PreparedActorConfig {
@@ -81,6 +83,7 @@ export interface CreateActorRunConfig {
     input: ActorInputData;
     urlData: UrlInput;
     playwrightBrowser?: 'chrome' | 'firefox' | 'webkit';
+    memory?: number;
 }
 
 export interface UrlCheckResult {
@@ -102,6 +105,9 @@ export interface ActorCheckDetailedOutput {
     url: string;
     simplifiedOutput: string;
     detailedOutput: string;
+    runUrl: string;
+
+    successRate?: number;
 
     // Page data
     totalPages: UrlCheckResult[];

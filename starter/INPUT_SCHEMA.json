@@ -143,6 +143,15 @@
       "description": "Only works for Puppeteer type. Will wait on each page. You can provide number in ms or a selector.",
       "editor": "textfield"
     },
+    "puppeteer.memory": {
+        "title": "Memory",
+        "type": "integer",
+        "unit": "MB",
+        "default": 4096,
+        "minimum": 1024,
+        "maximum": 32768,
+        "description": "Must be power of 2 between 128 and 32768."
+    },
     "playwright.chrome": {
       "title": "Chrome",
       "type": "boolean",
@@ -183,6 +192,15 @@
       "type": "string",
       "description": "Only works for playwright type. Will wait on each page. You can provide number in ms or a selector.",
       "editor": "textfield"
+    },
+    "playwright.memory": {
+        "title": "Memory",
+        "type": "integer",
+        "unit": "MB",
+        "default": 4096,
+        "minimum": 1024,
+        "maximum": 32768,
+        "description": "Must be power of 2 between 128 and 32768."
     }
   },
   "required": ["urlsToCheck"]

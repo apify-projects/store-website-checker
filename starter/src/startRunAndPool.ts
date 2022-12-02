@@ -30,5 +30,8 @@ export async function waitForRunToFinishAndPushData(runConfig: PreparedActorConf
         value.playwrightBrowser = 'webkit';
     }
 
+    value.successRate = Number(((value.success / value.totalPages) * 100).toFixed(2));
+    value.runUrl = `https://console.apify.com/actors/runs/${runConfig.runId}`;
+
     await Actor.pushData(value);
 }

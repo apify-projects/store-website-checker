@@ -1,7 +1,7 @@
 import { ACTOR_CHEERIO_CHECKER_NAME, ACTOR_PLAYWRIGHT_CHECKER_NAME, ACTOR_PUPPETEER_CHECKER_NAME } from './constants.js';
 import type { PreparedActorConfig, ActorInputData, CreateActorRunConfig } from './typedefs.js';
 
-export function convertInputToActorConfigs(input: ActorInputData) {
+export function convertInputToActorConfigs(input: ActorInputData): PreparedActorConfig[] {
     const configs: PreparedActorConfig[] = [];
 
     for (const urlData of input.urlsToCheck) {
@@ -9,7 +9,7 @@ export function convertInputToActorConfigs(input: ActorInputData) {
             configs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_CHEERIO_CHECKER_NAME }));
         }
         if (input['checkers.puppeteer']) {
-            configs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_PUPPETEER_CHECKER_NAME }));
+            configs.push(...createActorRunConfigForCrawler({ input, urlData, checkerId: ACTOR_PUPPETEER_CHECKER_NAME, memory: input['puppeteer.memory'] }));
         }
         if (input['checkers.playwright']) {
             // Create a run config for each playwright browser
@@ -19,6 +19,7 @@ export function convertInputToActorConfigs(input: ActorInputData) {
                     urlData,
                     checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
                     playwrightBrowser: 'chrome',
+                    memory: input['playwright.memory'],
                 }));
             }
             if (input['playwright.firefox']) {
@@ -27,6 +28,7 @@ export function convertInputToActorConfigs(input: ActorInputData) {
                     urlData,
                     checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
                     playwrightBrowser: 'firefox',
+                    memory: input['playwright.memory'],
                 }));
             }
             if (input['playwright.webkit']) {
@@ -35,6 +37,7 @@ export function convertInputToActorConfigs(input: ActorInputData) {
                     urlData,
                     checkerId: ACTOR_PLAYWRIGHT_CHECKER_NAME,
                     playwrightBrowser: 'webkit',
+                    memory: input['playwright.memory'],
                 }));
             }
         }
@@ -43,7 +46,7 @@ export function convertInputToActorConfigs(input: ActorInputData) {
     return configs;
 }
 
-function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser }: CreateActorRunConfig) {
+function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser, memory }: CreateActorRunConfig) {
     for (const group of input.proxyConfiguration.apifyProxyGroups ?? ['auto']) {
         const config: PreparedActorConfig = {
             actorId: checkerId,
@@ -67,7 +70,7 @@ function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwright
                 navigationTimeoutSecs: input.navigationTimeoutSecs,
             },
             params: {
-                memory: checkerId === ACTOR_CHEERIO_CHECKER_NAME ? 4096 : 8192,
+                memory: memory || (checkerId === ACTOR_CHEERIO_CHECKER_NAME ? 4096 : 8192),
                 timeout: 24 * 3600,
             },
         };
