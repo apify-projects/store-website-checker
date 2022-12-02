@@ -48,10 +48,11 @@ export function convertInputToActorConfigs(input: ActorInputData): PreparedActor
 
 function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser, memory }: CreateActorRunConfig) {
     for (const group of input.proxyConfiguration.apifyProxyGroups ?? ['auto']) {
+        const { url } = urlData;
         const config: PreparedActorConfig = {
             actorId: checkerId,
             proxyUsed: group === 'auto' ? undefined : group,
-            url: urlData.url,
+            url,
             input: {
                 saveSnapshot: input.saveSnapshot,
                 urlsToCheck: [urlData],
@@ -60,8 +61,10 @@ function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwright
                     apifyProxyCountry: input.proxyConfiguration.apifyProxyCountry,
                     apifyProxyGroups: group === 'auto' ? undefined : [group],
                 },
-                linkSelector: input.linkSelector,
-                pseudoUrls: input.pseudoUrls,
+                linkSelector: input.enqueueAllOnDomain ? 'a[href]' : input.linkSelector,
+                pseudoUrls: input.enqueueAllOnDomain
+                    ? [{ purl: `${new URL(url).origin}[.*]` }]
+                    : input.pseudoUrls,
                 repeatChecksOnProvidedUrls: input.repeatChecksOnProvidedUrls,
                 maxNumberOfPagesCheckedPerDomain: input.maxNumberOfPagesCheckedPerDomain,
                 maxConcurrentPagesCheckedPerDomain: input.maxConcurrentPagesCheckedPerDomain,

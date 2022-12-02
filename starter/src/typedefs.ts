@@ -42,6 +42,7 @@ export interface ActorInputData {
     // General options
     urlsToCheck: UrlInput[];
     proxyConfiguration: ProxyConfiguration;
+    enqueueAllOnDomain?: boolean;
     linkSelector?: string;
     pseudoUrls: PseudoUrlInput[];
     repeatChecksOnProvidedUrls?: number;

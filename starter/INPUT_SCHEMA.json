@@ -56,6 +56,12 @@
       "editor": "checkbox",
       "groupCaption": "Save Snapshots"
     },
+    "enqueueAllOnDomain": {
+      "title": "Enqueue any URL on domain (no need for link selector or pseudo URLs)",
+      "type": "boolean",
+      "description": "Will enqueue any URLs on the domain",
+      "default": false
+    },
     "linkSelector": {
       "title": "Link Selector",
       "type": "string",
