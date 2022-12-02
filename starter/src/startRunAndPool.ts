@@ -1,6 +1,6 @@
-import { Actor } from 'apify';
+import { Actor, ActorRun } from 'apify';
 
-import type { PreparedActorConfig, ActorCheckSimplifiedOutput } from './typedefs.js';
+import type { PreparedActorConfig, ActorCheckSimplifiedOutput, FixedActorRun } from './typedefs.js';
 
 export async function startRun(run: PreparedActorConfig) {
     const client = Actor.newClient();
@@ -13,13 +13,20 @@ export async function waitForRunToFinishAndPushData(runConfig: PreparedActorConf
     const client = Actor.newClient();
     const run = client.run(runConfig.runId!);
 
-    const finishedRun = await run.waitForFinish();
-    const { computeUnits } = finishedRun.stats;
+    const finishedRun = await run.waitForFinish() as FixedActorRun;
+    const {
+        ACTOR_COMPUTE_UNITS: computeUnits,
+        PROXY_RESIDENTIAL_TRANSFER_GBYTES: residentialGBs,
+    } = finishedRun.usage;
 
     const value = (await run.keyValueStore().getRecord('OUTPUT'))!.value as ActorCheckSimplifiedOutput;
 
     value.computeUnitsUsedForThisCheck = Number(computeUnits.toFixed(4));
     value.pagesPerComputeUnit = Number((value.totalPages / computeUnits).toFixed(2));
+    value.computeUnitsPerRequest = Number((computeUnits / value.totalPages).toFixed(6));
+    // 8 decimals gives all the precision we need (level of 10 Bytes)
+    value.residentialGBs = Number(residentialGBs.toFixed(8));
+    value.residentialGBsPerRequest = Number((residentialGBs / value.totalPages).toFixed(8));
     value.proxyUsed = runConfig.proxyUsed;
 
     if (runConfig.input['playwright.chrome']) {

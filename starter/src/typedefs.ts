@@ -1,3 +1,5 @@
+import { ActorRun } from "apify";
+
 export interface FrontendActorState {
     totalUrls: number;
     runConfigurations: PreparedActorConfig[];
@@ -99,7 +101,10 @@ export interface ActorCheckDetailedOutput {
     playwrightBrowser?: 'chrome' | 'firefox' | 'webkit';
     computeUnitsUsedForThisCheck?: number;
     // (totalPages.length / computeUnitsUsedForThisCheck) yields the amount of pages checkable per compute unit
-    pagesPerComputeUnit?: number;
+    pagesPerComputeUnit: number;
+    computeUnitsPerRequest: number;
+    residentialGBs: number;
+    residentialGBsPerRequest: number;
 
     // URLs
     url: string;
@@ -132,4 +137,21 @@ export type ActorCheckSimplifiedOutput = {
             : ActorCheckDetailedOutput[K] extends { [key: number]: UrlCheckResult[] }
                 ? Record<number, number>
                 : ActorCheckDetailedOutput[K];
+};
+
+export interface FixedActorRun extends ActorRun {
+    usage: {
+        ACTOR_COMPUTE_UNITS: number,
+        DATASET_READS: number,
+        DATASET_WRITES: number,
+        KEY_VALUE_STORE_READS: number,
+        KEY_VALUE_STORE_WRITES: number,
+        KEY_VALUE_STORE_LISTS: number,
+        REQUEST_QUEUE_READS: number,
+        REQUEST_QUEUE_WRITES: number,
+        DATA_TRANSFER_INTERNAL_GBYTES: number,
+        DATA_TRANSFER_EXTERNAL_GBYTES: number,
+        PROXY_RESIDENTIAL_TRANSFER_GBYTES: number,
+        PROXY_SERPS: number,
+    }
 };
