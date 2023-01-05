@@ -62,6 +62,8 @@ export async function handlePage(
         wasSuccess,
     });
 
+    const pageOrigin = new URL(request.url).origin;
+
     if (input.linkSelector && !!$) {
         const info = await requestQueue.getInfo();
 
@@ -69,7 +71,11 @@ export async function handlePage(
         if (maxUrlsToEnqueue > 0) {
             const toEnqueue: RequestOptions[] = [];
             $(input.linkSelector).each((_, el) => {
-                const href = $(el).attr('href');
+                const rawHref = $(el).attr('href');
+                if (!rawHref) {
+                    return;
+                }
+                const href = new URL(rawHref, pageOrigin).toString();
                 for (const pseudoUrlInput of input.pseudoUrls) {
                     if (href && new PseudoUrl(pseudoUrlInput.purl).matches(href)) {
                         const newUrl = new URL(href, request.loadedUrl).toString();
@@ -83,6 +89,7 @@ export async function handlePage(
                     }
                 }
             });
+            console.log(`Found ${toEnqueue.length} links to enqueue on ${request.url}.`);
             await crawler.addRequests(toEnqueue.slice(0, maxUrlsToEnqueue));
         }
     }

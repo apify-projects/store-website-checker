@@ -1,8 +1,9 @@
 import { Actor } from 'apify';
 import Cheerio from 'cheerio';
 
+import { PseudoUrl } from 'crawlee';
 import type { RequestQueue } from 'apify';
-import type { PlaywrightCrawlingContext, PseudoUrlInput } from 'crawlee';
+import type { PlaywrightCrawlingContext, RequestOptions } from 'crawlee';
 
 import { testHtml } from './checkers.js';
 
@@ -14,8 +15,8 @@ export async function handlePage(
     input: PlaywrightActorInput,
     requestQueue: RequestQueue,
     state: ActorCheckDetailedOutput,
-    { request, response, page, enqueueLinks }: PlaywrightCrawlingContext,
-) {
+    { request, response, page, crawler }: PlaywrightCrawlingContext,
+): Promise<void> {
     let htmlUrl;
     let screenshotUrl;
 
@@ -81,26 +82,35 @@ export async function handlePage(
         wasSuccess,
     });
 
-    if (input.linkSelector) {
+    const pageOrigin = new URL(request.url).origin;
+
+    if (input.linkSelector && !!$) {
         const info = await requestQueue.getInfo();
 
-        // Only queue up more requests in the queue if we should (this should avoid excessive queue writes)
-        if (input.maxNumberOfPagesCheckedPerDomain > info!.totalRequestCount) {
-            await enqueueLinks({
-                selector: input.linkSelector,
-                pseudoUrls: input.pseudoUrls.map(
-                    (req) => ({
-                        purl: req.purl,
-                        url: request.url,
-                        headers: req.headers,
-                        method: req.method,
-                        payload: req.payload,
-                        userData: req.userData,
-                    }) as PseudoUrlInput,
-                ),
-                requestQueue,
-                baseUrl: request.loadedUrl,
+        const maxUrlsToEnqueue = input.maxNumberOfPagesCheckedPerDomain - info!.totalRequestCount;
+        if (maxUrlsToEnqueue > 0) {
+            const toEnqueue: RequestOptions[] = [];
+            $(input.linkSelector).each((_, el) => {
+                const rawHref = $(el).attr('href');
+                if (!rawHref) {
+                    return;
+                }
+                const href = new URL(rawHref, pageOrigin).toString();
+                for (const pseudoUrlInput of input.pseudoUrls) {
+                    if (href && new PseudoUrl(pseudoUrlInput.purl).matches(href)) {
+                        const newUrl = new URL(href, request.loadedUrl).toString();
+                        toEnqueue.push({
+                            url: newUrl,
+                            headers: pseudoUrlInput.headers,
+                            method: pseudoUrlInput.method as 'GET' | 'POST',
+                            payload: pseudoUrlInput.payload,
+                            userData: pseudoUrlInput.userData,
+                        });
+                    }
+                }
             });
+            console.log(`Found ${toEnqueue.length} links to enqueue on ${request.url}.`);
+            await crawler.addRequests(toEnqueue.slice(0, maxUrlsToEnqueue));
         }
     }
 }
