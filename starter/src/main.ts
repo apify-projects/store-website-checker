@@ -14,6 +14,7 @@ Actor.main(async () => {
     log.debug('Provided inputs:');
     log.debug(inspect(input));
 
+    // TODO: Add utilization of all user memory instead of having to rely on maxConcurrentDomainsChecked
     const { maxConcurrentDomainsChecked, urlsToCheck } = input;
 
     // Log the input

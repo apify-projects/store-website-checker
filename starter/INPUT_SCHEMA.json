@@ -24,7 +24,12 @@
       "default": {},
       "editor": "proxy",
       "prefill": {
-        "useApifyProxy": false
+        "useApifyProxy": true,
+        "apifyProxyGroups": [
+          "SHADER",
+          "BUYPROXIES94952",
+          "RESIDENTIAL"
+        ]
       }
     },
     "checkers.cheerio": {
@@ -47,20 +52,22 @@
       "title": "Playwright",
       "type": "boolean",
       "description": "Crawl with Playwright",
-      "editor": "checkbox"
+      "editor": "checkbox",
+      "default": true
     },
     "saveSnapshot": {
       "title": "Enabled",
       "type": "boolean",
       "description": "Will save HTML for Cheerio and HTML + screenshot for Puppeteer/Playwright",
       "editor": "checkbox",
-      "groupCaption": "Save Snapshots"
+      "groupCaption": "Save Snapshots",
+      "default": true
     },
     "enqueueAllOnDomain": {
       "title": "Enqueue any URL on domain (no need for link selector or pseudo URLs)",
       "type": "boolean",
       "description": "Will enqueue any URLs on the domain",
-      "default": false
+      "default": true
     },
     "linkSelector": {
       "title": "Link Selector",
@@ -68,40 +75,34 @@
       "description": "A CSS selector saying which links on the page (<code>&lt;a&gt;</code> elements with <code>href</code> attribute) shall be followed and added to the request queue. This setting only applies if <b>Use request queue</b> is enabled. To filter the links added to the queue, use the <b>Pseudo-URLs</b> setting.<br><br>If <b>Link selector</b> is empty, the page links are ignored.<br><br>For details, see <a href='https://apify.com/apify/web-scraper#link-selector' target='_blank' rel='noopener'>Link selector</a> in README.",
       "sectionCaption": "Crawler Options",
       "sectionDescription": "Specific options that are relevant for crawlers",
-      "editor": "textfield",
-      "prefill": "a[href]",
-      "minLength": 1
+      "editor": "textfield"
     },
     "pseudoUrls": {
       "title": "Pseudo-URLs",
       "type": "array",
       "description": "Specifies what kind of URLs found by <b>Link selector</b> should be added to the request queue. A pseudo-URL is a URL with regular expressions enclosed in <code>[]</code> brackets, e.g. <code>http://www.example.com/[.*]</code>. This setting only applies if the <b>Use request queue</b> option is enabled.<br><br>If <b>Pseudo-URLs</b> are omitted, the actor enqueues all links matched by the <b>Link selector</b>.<br><br>For details, see <a href='https://apify.com/apify/web-scraper#pseudo-urls' target='_blank' rel='noopener'>Pseudo-URLs</a> in README.",
       "default": [],
-      "editor": "pseudoUrls",
-      "prefill": [
-        {
-          "purl": "https://www.amazon.com[.*]/dp/[.*]"
-        }
-      ]
+      "editor": "pseudoUrls"
     },
     "repeatChecksOnProvidedUrls": {
       "title": "Repeat checks on provided URLs",
       "type": "integer",
       "description": "Will access each URL multiple times. Useful to test the same URL or bypass blocking of the first page.",
-      "editor": "number"
+      "editor": "number",
+      "prefill": 10
     },
     "maxNumberOfPagesCheckedPerDomain": {
       "title": "Max number of pages checked per domain",
       "type": "integer",
       "description": "The maximum number of pages that the checker will load. The checker will stop when this limit is reached. It's always a good idea to set this limit in order to prevent excess platform usage for misconfigured scrapers. Note that the actual number of pages loaded might be slightly higher than this value.<br><br>If set to <code>0</code>, there is no limit.",
-      "default": 100,
+      "prefill": 1000,
       "editor": "number"
     },
     "maxConcurrentPagesCheckedPerDomain": {
       "title": "Maximum concurrent pages checked per domain",
       "type": "integer",
       "description": "Specifies the maximum number of pages that can be processed by the checker in parallel for one domain. The checker automatically increases and decreases concurrency based on available system resources. This option enables you to set an upper limit, for example to reduce the load on a target website.",
-      "default": 50,
+      "default": 500,
       "editor": "number",
       "minimum": 1
     },
@@ -147,7 +148,8 @@
       "title": "Wait for",
       "type": "string",
       "description": "Only works for Puppeteer type. Will wait on each page. You can provide number in ms or a selector.",
-      "editor": "textfield"
+      "editor": "textfield",
+      "default": "2000"
     },
     "puppeteer.memory": {
         "title": "Memory",
@@ -162,7 +164,7 @@
       "title": "Chrome",
       "type": "boolean",
       "description": "Use Chrome when checking",
-      "default": true,
+      "default": false,
       "sectionCaption": "Playwright options",
       "sectionDescription": "Options passed to playwright when checking",
       "editor": "checkbox",
@@ -173,7 +175,8 @@
       "title": "Firefox",
       "type": "boolean",
       "description": "Use Firefox when checking",
-      "editor": "checkbox"
+      "editor": "checkbox",
+      "default": true
     },
     "playwright.webkit": {
       "title": "Safari (Webkit)",
@@ -197,7 +200,8 @@
       "title": "Wait for",
       "type": "string",
       "description": "Only works for playwright type. Will wait on each page. You can provide number in ms or a selector.",
-      "editor": "textfield"
+      "editor": "textfield",
+        "default": "2000"
     },
     "playwright.memory": {
         "title": "Memory",
