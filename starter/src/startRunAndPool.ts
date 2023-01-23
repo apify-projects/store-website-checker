@@ -29,7 +29,7 @@ export async function waitForRunToFinishAndPushData(runConfig: PreparedActorConf
     value.residentialGBs = Number(residentialGBs.toFixed(8));
     value.residentialGBsPerRequest = Number((residentialGBs / value.totalPages).toFixed(8));
     value.proxyUsed = runConfig.proxyUsed;
-    value.estimatedCost = Number((computeUnits * DEFAULT_COSTS.COMPUTE_UNIT + residentialGBs * DEFAULT_COSTS.RESIDENTIAL_GB).toFixed(6));
+    value.estimatedCost = Number((computeUnits * DEFAULT_COSTS.COMPUTE_UNIT + residentialGBs * DEFAULT_COSTS.RESIDENTIAL_GB).toFixed(4));
     value.estimatedCostPerRequest = Number((value.estimatedCost / value.totalPages).toFixed(6));
 
     if (runConfig.input['playwright.chrome']) {

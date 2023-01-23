@@ -106,6 +106,9 @@ export interface ActorCheckDetailedOutput {
     computeUnitsPerRequest: number;
     residentialGBs: number;
     residentialGBsPerRequest: number;
+    estimatedCost: number;
+    estimatedCostPerRequest: number;
+
 
     // URLs
     url: string;
