@@ -6,6 +6,7 @@ import { convertInputToActorConfigs } from './configs.js';
 import { waitForRunToFinishAndPushData, startRun } from './startRunAndPool.js';
 
 import type { ActorInputData, FrontendActorState, PreparedActorConfig } from './typedefs.js';
+import { TABLE_FIELDS_ORDER } from './constants.js';
 
 const env = Actor.getEnv();
 
@@ -86,6 +87,6 @@ Actor.main(async () => {
     await Actor.setValue('STATE', state);
 
     log.info(`\nChecking ${state.totalUrls} URLs completed!`);
-    log.info(`Please go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=html to see the results`);
-    log.info(`Go to https://api.apify.com/v2/datasets/${env.defaultDatasetId}/items?clean=true&format=json for the JSON output`);
+    log.info(`NICER TABLE VIEW:\nhttps://api.apify.com/v2/datasets/${Actor.getEnv().defaultDatasetId}/items?clean=true&format=html`
+        + `&fields=${TABLE_FIELDS_ORDER.join(',')}`);
 });
