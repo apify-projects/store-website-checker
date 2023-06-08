@@ -53,9 +53,6 @@ Please follow the [actor's input page](https://apify.com/lukaskrivka/website-che
 }
 ```
 
-#### Detailed output with URLs, screenshots and HTML links
-<https://api.apify.com/v2/key-value-stores/zT3zxpd53Wv9m9ukQ/records/DETAILED-OUTPUT?disableRedirect=true>
-
 ### Changelog
 
 Check history of changes in the [CHANGELOG](https://github.com/metalwarrior665/actor-website-checker/blob/master/CHANGELOG.md)
