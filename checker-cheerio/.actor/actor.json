@@ -1,6 +1,6 @@
 {
+	"actorSpecification": 1,
 	"name": "checker-cheerio",
 	"version": "0.0",
-	"buildTag": "latest",
-	"env": null
+	"buildTag": "latest"
 }

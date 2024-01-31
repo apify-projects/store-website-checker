@@ -47,7 +47,10 @@ export function convertInputToActorConfigs(input: ActorInputData): PreparedActor
 }
 
 function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser, memory }: CreateActorRunConfig) {
-    for (const group of input.proxyConfiguration.apifyProxyGroups ?? ['auto']) {
+    const proxyGroups = input.proxyConfiguration.apifyProxyGroups?.length > 0
+        ? input.proxyConfiguration.apifyProxyGroups
+        : ['auto'];  
+    for (const group of proxyGroups) {
         const { url } = urlData;
         const config: PreparedActorConfig = {
             actorId: checkerId,

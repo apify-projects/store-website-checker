@@ -49,6 +49,8 @@ Actor.main(async () => {
         userData: { actorInput },
     }));
 
+    
+
     const requestList = await RequestList.open(null, sources);
 
     const runner = new BasicCrawler({

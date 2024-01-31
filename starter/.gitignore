@@ -3,3 +3,5 @@ apify_storage
 dist
 
 storage
+# Added by Apify CLI
+.venv

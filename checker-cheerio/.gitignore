@@ -8,3 +8,5 @@ apify_storage
 storage
 storage
 storage
+# Added by Apify CLI
+.venv
