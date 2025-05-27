@@ -1,5 +1,5 @@
 import { Actor } from 'apify';
-import Cheerio from 'cheerio';
+import * as Cheerio from 'cheerio';
 
 import { PseudoUrl } from 'crawlee';
 import type { RequestQueue } from 'apify';

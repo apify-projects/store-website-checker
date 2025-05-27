@@ -13,7 +13,7 @@ Actor.main(async () => {
 
     // Log the input
     // Log the input
-    log.info('Input provided:');
+    log.debug('Input provided:');
     log.debug(inspect(input, false, 4));
 
     log.info('Running a Puppeteer Checker.');

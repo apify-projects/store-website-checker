@@ -1,5 +1,5 @@
 import { Actor } from 'apify';
-import Cheerio from 'cheerio';
+import * as Cheerio from 'cheerio';
 import { testHtml } from './checkers.js';
 import { puppeteerUtils, PseudoUrl, sleep } from 'crawlee';
 
