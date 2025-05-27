@@ -10,7 +10,7 @@
         "apify": "^3.0.0",
         "crawlee": "^3.0.0",
         "playwright": "*",
-        "cheerio": "^1.0.0-rc.10"
+        "cheerio": "^1.0.0"
     },
     "devDependencies": {
         "@apify/eslint-config-ts": "^0.2.3",
@@ -19,7 +19,15 @@
         "@typescript-eslint/parser": "^5.32.0",
         "eslint": "^8.20.0",
         "ts-node": "^10.9.1",
-        "typescript": "4.7.4"
+        "typescript": "^5.0"
+    },
+    "//": [
+        "(this is a comment btw, see https://stackoverflow.com/a/14221781/7292139 :D)",
+        "the override below is needed due to https://github.com/inikulin/parse5/issues/1481",
+        "when that issue is fixed, the override can be removed hopefully"
+    ],
+    "overrides": {
+        "parse5": "<7.3.0"
     },
     "scripts": {
         "start": "npm run start:dev",

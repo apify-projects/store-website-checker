@@ -1,7 +1,7 @@
 import { Actor } from 'apify';
 import Cheerio from 'cheerio';
 import { testHtml } from './checkers.js';
-import { puppeteerUtils, PseudoUrl } from 'crawlee';
+import { puppeteerUtils, PseudoUrl, sleep } from 'crawlee';
 
 import type { RequestQueue } from 'apify';
 import type { PuppeteerCrawlingContext, RequestOptions } from 'crawlee';
@@ -23,7 +23,7 @@ export async function handlePage(
         // We wait for number in ms or a selector
         const maybeNumber = Number(waitFor);
         if (maybeNumber || maybeNumber === 0) {
-            await page.waitForTimeout(maybeNumber);
+            await sleep(maybeNumber);
         } else {
             await page.waitForSelector(waitFor);
         }
