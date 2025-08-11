@@ -62,12 +62,16 @@ export async function handlePage(
         wasSuccess,
     });
 
-    const pageOrigin = new URL(request.url).origin;
+    const currentUrl = request.loadedUrl ?? request.url;
+    const pageOrigin = new URL(currentUrl).origin;
 
     if (input.linkSelector && !!$) {
         const info = await requestQueue.getInfo();
 
         const maxUrlsToEnqueue = input.maxNumberOfPagesCheckedPerDomain - info!.totalRequestCount;
+        // Using page.url() in case the initial link was redirected.
+        const initialDomain = request.userData.initialDomain ?? new URL(currentUrl).hostname;
+
         if (maxUrlsToEnqueue > 0) {
             const toEnqueue: RequestOptions[] = [];
             $(input.linkSelector).each((_, el) => {
@@ -76,6 +80,15 @@ export async function handlePage(
                     return;
                 }
                 const href = new URL(rawHref, pageOrigin).toString();
+
+                if (!['http:', 'https:'].includes(new URL(href).protocol)) {
+                    return; // Skipping invalid protocol (mailto:, ftp: etc...)
+                }
+
+                if (input.allowOnlyLinksFromSameDomain && new URL(href).hostname !== initialDomain) {
+                    return; // Skip if only links related to the same domain are allowed.
+                }
+
                 for (const pseudoUrlInput of input.pseudoUrls) {
                     if (href && new PseudoUrl(pseudoUrlInput.purl).matches(href)) {
                         const newUrl = new URL(href, request.loadedUrl).toString();
@@ -84,7 +97,10 @@ export async function handlePage(
                             headers: pseudoUrlInput.headers,
                             method: pseudoUrlInput.method as 'GET' | 'POST',
                             payload: pseudoUrlInput.payload,
-                            userData: pseudoUrlInput.userData,
+                            userData: {
+                                ...pseudoUrlInput.userData,
+                                initialDomain: input.allowOnlyLinksFromSameDomain ? initialDomain : undefined,
+                            },
                         });
                     }
                 }

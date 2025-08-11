@@ -3,7 +3,7 @@ import { log, PlaywrightCrawler, RequestOptions } from 'crawlee';
 import { chromium, firefox, webkit } from 'playwright';
 import { inspect } from 'util';
 
-import type { ActorCheckDetailedOutput, PlaywrightActorInput } from './typedefs';
+import type { ActorCheckDetailedOutput, PlaywrightActorInput } from './typedefs.js';
 
 import { handleFailedRequest } from './handleFailedRequest.js';
 import { handlePage } from './handlePage.js';

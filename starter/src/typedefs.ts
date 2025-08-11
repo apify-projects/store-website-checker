@@ -1,4 +1,4 @@
-import { ActorRun } from "apify";
+import { ActorRun } from 'apify';
 
 export interface FrontendActorState {
     totalUrls: number;
@@ -45,6 +45,7 @@ export interface ActorInputData {
     enqueueAllOnDomain?: boolean;
     linkSelector?: string;
     pseudoUrls: PseudoUrlInput[];
+    allowOnlyLinksFromSameDomain?: boolean;
     repeatChecksOnProvidedUrls?: number;
     maxNumberOfPagesCheckedPerDomain: number;
     maxConcurrentPagesCheckedPerDomain: number;
@@ -108,7 +109,6 @@ export interface ActorCheckDetailedOutput {
     residentialGBsPerRequest: number;
     estimatedCost: number;
     estimatedCostPerRequest: number;
-
 
     // URLs
     url: string;

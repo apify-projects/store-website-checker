@@ -44,6 +44,13 @@
       "prefill": "a[href]",
       "minLength": 1
     },
+    "allowOnlyLinksFromSameDomain": {
+      "title": "Allow only links from the same domain",
+      "type": "boolean",
+      "description": "Additional check to make sure that only link related to the same domain are enqueued.",
+      "editor": "checkbox",
+      "prefill": false
+    },
     "pseudoUrls": {
       "title": "Pseudo-URLs",
       "type": "array",
