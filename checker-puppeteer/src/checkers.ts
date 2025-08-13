@@ -7,7 +7,7 @@ export function distilCaptcha($: CheerioAPI): boolean {
 
 export function recaptcha($: CheerioAPI): boolean {
     return $('#recaptcha').length > 0
-        || $('iframe[src*="/recaptcha/"]').length > 0;
+        || $('iframe[src*="/recaptcha/"]:not([width="0"][height="0"])').length > 0;
 }
 
 export function hCaptcha($: CheerioAPI): boolean {
