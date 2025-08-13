@@ -49,7 +49,7 @@ export function convertInputToActorConfigs(input: ActorInputData): PreparedActor
 function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwrightBrowser, memory }: CreateActorRunConfig) {
     const proxyGroups = input.proxyConfiguration.apifyProxyGroups?.length
         ? input.proxyConfiguration.apifyProxyGroups
-        : ['auto'];  
+        : ['auto'];
     for (const group of proxyGroups) {
         const { url } = urlData;
         const config: PreparedActorConfig = {
@@ -66,8 +66,9 @@ function* createActorRunConfigForCrawler({ input, urlData, checkerId, playwright
                 },
                 linkSelector: input.enqueueAllOnDomain ? 'a[href]' : input.linkSelector,
                 pseudoUrls: input.enqueueAllOnDomain
-                    ? [{ purl: `${new URL(url).origin}[.*]` }]
+                    ? [{ purl: `[.*]` }]
                     : input.pseudoUrls,
+                allowOnlyLinksFromSameDomain: input.enqueueAllOnDomain,
                 repeatChecksOnProvidedUrls: input.repeatChecksOnProvidedUrls,
                 maxNumberOfPagesCheckedPerDomain: input.maxNumberOfPagesCheckedPerDomain,
                 maxConcurrentPagesCheckedPerDomain: input.maxConcurrentPagesCheckedPerDomain,

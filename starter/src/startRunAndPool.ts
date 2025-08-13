@@ -1,4 +1,4 @@
-import { Actor, ActorRun } from 'apify';
+import { Actor } from 'apify';
 
 import { DEFAULT_COSTS } from './constants.js';
 import type { PreparedActorConfig, ActorCheckSimplifiedOutput, FixedActorRun } from './typedefs.js';

@@ -53,6 +53,7 @@ export interface ActorInputData {
     urlsToCheck: UrlInput[];
     proxyConfiguration: ProxyConfiguration;
     linkSelector?: string;
+    allowOnlyLinksFromSameDomain?: boolean;
     pseudoUrls: PseudoUrlInputCustom[];
     repeatChecksOnProvidedUrls?: number;
     maxNumberOfPagesCheckedPerDomain: number;

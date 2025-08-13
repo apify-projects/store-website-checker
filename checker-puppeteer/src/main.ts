@@ -1,7 +1,7 @@
 import { Actor } from 'apify';
 import { log, PuppeteerCrawler, RequestOptions } from 'crawlee';
 
-import type { ActorCheckDetailedOutput, PuppeteerActorInput } from './typedefs';
+import type { ActorCheckDetailedOutput, PuppeteerActorInput } from './typedefs.js';
 
 import { inspect } from 'util';
 import { handleFailedRequest } from './handleFailedRequest.js';
